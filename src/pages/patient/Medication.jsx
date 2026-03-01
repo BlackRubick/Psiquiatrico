@@ -217,9 +217,22 @@ const Medication = () => {
         // Inicializar schedules y taken en cada medicamento
         medsData = medsData.map(med => {
           // schedules
-          const schedules = typeof med.schedules === 'string'
-            ? JSON.parse(med.schedules)
-            : (med.schedules || { morning: false, afternoon: false, night: false });
+          let schedules = { morning: false, afternoon: false, night: false };
+          try {
+            schedules = typeof med.schedules === 'string'
+              ? JSON.parse(med.schedules)
+              : (med.schedules || {
+                  morning: !!med.morning,
+                  afternoon: !!med.afternoon,
+                  night: !!med.night,
+                });
+          } catch (e) {
+            schedules = {
+              morning: !!med.morning,
+              afternoon: !!med.afternoon,
+              night: !!med.night,
+            };
+          }
           // taken: construir objeto con los registros de medicación tomada
           const taken = {};
           takenData.forEach(reg => {
@@ -500,14 +513,14 @@ const Medication = () => {
               </thead>
               <tbody>
                 {medications.map((med) => (
-                  times.filter(time => med.schedules[time.key]).map((time) => (
+                  times.filter(time => med.schedules?.[time.key]).map((time) => (
                     <tr key={`${med.id}-${time.key}`}>
                       <td className="border-2 border-gray-300 p-3 font-semibold">
                         {med.name}
                         <div className="text-xs text-gray-600">{time.label} - {time.time}</div>
                       </td>
                       {dayKeys.map((day) => {
-                        const taken = med.taken[day]?.[time.key];
+                        const taken = med.taken?.[day]?.[time.key];
                         return (
                           <td key={day} className="border-2 border-gray-300 p-2 text-center">
                             <button
