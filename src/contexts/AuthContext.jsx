@@ -175,8 +175,10 @@ export const AuthProvider = ({ children }) => {
     }
   };
 
+  const token = localStorage.getItem('biopsyche_token');
+
   return (
-    <AuthContext.Provider value={{ user, userType, profesionalId, login, logout, register, loading }}>
+    <AuthContext.Provider value={{ user, userType, profesionalId, login, logout, register, loading, token }}>
       {children}
     </AuthContext.Provider>
   );
