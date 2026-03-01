@@ -1,0 +1,54 @@
+const Profesional = require('../models/Profesional');
+const Usuario = require('../models/Usuario');
+
+exports.getAll = async (req, res) => {
+  try {
+    const profesionales = await Profesional.findAll({ include: [{ model: Usuario, attributes: { exclude: ['password'] } }] });
+    res.json(profesionales);
+  } catch (err) {
+    res.status(500).json({ error: 'Error al obtener profesionales' });
+  }
+};
+
+exports.getById = async (req, res) => {
+  try {
+    const profesional = await Profesional.findByPk(req.params.id, { include: [{ model: Usuario, attributes: { exclude: ['password'] } }] });
+    if (!profesional) return res.status(404).json({ error: 'Profesional no encontrado' });
+    res.json(profesional);
+  } catch (err) {
+    res.status(500).json({ error: 'Error al obtener profesional' });
+  }
+};
+
+exports.create = async (req, res) => {
+  try {
+    // Se espera que el usuario ya exista y se pase usuario_id
+    const { usuario_id, ...rest } = req.body;
+    const profesional = await Profesional.create({ usuario_id, ...rest });
+    res.status(201).json(profesional);
+  } catch (err) {
+    res.status(500).json({ error: 'Error al crear profesional' });
+  }
+};
+
+exports.update = async (req, res) => {
+  try {
+    const profesional = await Profesional.findByPk(req.params.id);
+    if (!profesional) return res.status(404).json({ error: 'Profesional no encontrado' });
+    await profesional.update(req.body);
+    res.json({ message: 'Profesional actualizado' });
+  } catch (err) {
+    res.status(500).json({ error: 'Error al actualizar profesional' });
+  }
+};
+
+exports.remove = async (req, res) => {
+  try {
+    const profesional = await Profesional.findByPk(req.params.id);
+    if (!profesional) return res.status(404).json({ error: 'Profesional no encontrado' });
+    await profesional.destroy();
+    res.json({ message: 'Profesional eliminado' });
+  } catch (err) {
+    res.status(500).json({ error: 'Error al eliminar profesional' });
+  }
+};
