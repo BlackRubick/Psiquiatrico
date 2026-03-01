@@ -28,10 +28,29 @@ exports.getByUsuarioId = async (req, res) => {
       return res.status(403).json({ error: 'Acceso denegado' });
     }
 
-    const profesional = await Profesional.findOne({
+    let profesional = await Profesional.findOne({
       where: { usuario_id: usuarioId },
       include: [{ model: Usuario, attributes: { exclude: ['password'] } }],
     });
+
+    // Si el usuario logueado es healthcare y aún no tiene perfil profesional,
+    // crearlo automáticamente para habilitar asignación de actividades.
+    if (!profesional && req.user?.tipo_usuario === 'healthcare' && req.user.id === usuarioId) {
+      const usuario = await Usuario.findByPk(usuarioId);
+      if (!usuario) return res.status(404).json({ error: 'Usuario no encontrado' });
+
+      profesional = await Profesional.create({
+        usuario_id: usuarioId,
+        especialidad: 'General',
+        cedula: `AUTO-${usuarioId}`,
+      });
+
+      const created = await Profesional.findByPk(profesional.id, {
+        include: [{ model: Usuario, attributes: { exclude: ['password'] } }],
+      });
+
+      return res.status(201).json(created);
+    }
 
     if (!profesional) return res.status(404).json({ error: 'Profesional no encontrado' });
     res.json(profesional);
