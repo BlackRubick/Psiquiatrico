@@ -1,3 +1,23 @@
+// IMPORTANTE: Cargar dotenv PRIMERO antes de cualquier otro require
+const path = require('path');
+const fs = require('fs');
+
+const envPath = path.resolve(__dirname, '../.env');
+console.log('Intentando cargar .env desde:', envPath);
+console.log('Archivo existe:', fs.existsSync(envPath));
+
+require('dotenv').config({ path: envPath });
+
+// Verificar que las variables se cargaron
+console.log('DEBUG DB_DIALECT después de dotenv:', process.env.DB_DIALECT);
+console.log('DEBUG DB_HOST:', process.env.DB_HOST);
+
+if (!process.env.DB_DIALECT) {
+  console.error('❌ ERROR: Variables de entorno no se cargaron correctamente');
+  console.error('Asegúrate de que el archivo .env existe en:', envPath);
+  process.exit(1);
+}
+
 const sequelize = require('./config/db');
 const Usuario = require('./models/Usuario');
 const Paciente = require('./models/Paciente');
