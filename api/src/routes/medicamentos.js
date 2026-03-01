@@ -3,11 +3,11 @@ const router = express.Router();
 const medicamentoCtrl = require('../controllers/medicamentoController');
 const { authMiddleware, requireRole } = require('../middlewares/auth');
 
-// Solo healthcare y admin pueden gestionar medicamentos
-router.get('/', authMiddleware, requireRole('healthcare'), medicamentoCtrl.getAll);
-router.get('/:id', authMiddleware, requireRole('healthcare'), medicamentoCtrl.getById);
-router.post('/', authMiddleware, requireRole('healthcare'), medicamentoCtrl.create);
-router.put('/:id', authMiddleware, requireRole('healthcare'), medicamentoCtrl.update);
-router.delete('/:id', authMiddleware, requireRole('healthcare'), medicamentoCtrl.remove);
+// Admin/healthcare/paciente (paciente solo sus propios medicamentos)
+router.get('/', authMiddleware, requireRole('admin', 'healthcare', 'paciente', 'patient'), medicamentoCtrl.getAll);
+router.get('/:id', authMiddleware, requireRole('admin', 'healthcare', 'paciente', 'patient'), medicamentoCtrl.getById);
+router.post('/', authMiddleware, requireRole('admin', 'healthcare', 'paciente', 'patient'), medicamentoCtrl.create);
+router.put('/:id', authMiddleware, requireRole('admin', 'healthcare', 'paciente', 'patient'), medicamentoCtrl.update);
+router.delete('/:id', authMiddleware, requireRole('admin', 'healthcare', 'paciente', 'patient'), medicamentoCtrl.remove);
 
 module.exports = router;
