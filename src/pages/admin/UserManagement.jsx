@@ -11,7 +11,17 @@ export default function UserManagement() {
   const [editingUser, setEditingUser] = useState(null);
   const [editData, setEditData] = useState({});
   const [showCreate, setShowCreate] = useState(false);
-  const [createData, setCreateData] = useState({ nombre: '', tipo_usuario: 'paciente', email: '', estado: 'activo', contrasena: '' });
+  const [createData, setCreateData] = useState({ 
+    username: '', 
+    nombreCompleto: '', 
+    email: '', 
+    password: '', 
+    tipo_usuario: 'paciente', 
+    estado: 'activo',
+    edad: '',
+    telefono: '',
+    fecha_nacimiento: ''
+  });
   const { logout, token } = useAuth();
 
   // Cargar usuarios de la API
@@ -40,7 +50,7 @@ export default function UserManagement() {
   };
 
   const filteredUsers = userList.filter(
-    user => user.nombre?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    user => user.nombreCompleto?.toLowerCase().includes(searchTerm.toLowerCase()) ||
       user.email?.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
@@ -104,11 +114,14 @@ export default function UserManagement() {
             'Content-Type': 'application/json'
           },
           body: JSON.stringify({
-            nombre: editData.nombre,
+            nombreCompleto: editData.nombreCompleto || editData.nombre,
             email: editData.email,
             tipo_usuario: editData.tipo_usuario,
             estado: editData.estado,
-            contrasena: editData.contrasena
+            edad: editData.edad,
+            telefono: editData.telefono,
+            fecha_nacimiento: editData.fecha_nacimiento,
+            password: editData.password
           })
         });
         if (response.ok) {
@@ -116,7 +129,8 @@ export default function UserManagement() {
           setEditingUser(null);
           Swal.fire('Guardado', 'Los datos del usuario han sido actualizados.', 'success');
         } else {
-          Swal.fire('Error', 'No se pudo actualizar el usuario', 'error');
+          const error = await response.json();
+          Swal.fire('Error', error.error || 'No se pudo actualizar el usuario', 'error');
         }
       } catch (error) {
         console.error('Error:', error);
@@ -140,22 +154,31 @@ export default function UserManagement() {
           'Content-Type': 'application/json'
         },
         body: JSON.stringify({
-          nombre: createData.nombre,
+          username: createData.username,
+          nombreCompleto: createData.nombreCompleto,
           email: createData.email,
+          password: createData.password,
           tipo_usuario: createData.tipo_usuario,
           estado: createData.estado,
-          contrasena: createData.contrasena
+          edad: createData.edad,
+          telefono: createData.telefono,
+          fecha_nacimiento: createData.fecha_nacimiento
         })
       });
       if (response.ok) {
         const newUser = await response.json();
-        setUserList([...userList, newUser]);
+        const createdUser = {
+          ...newUser,
+          nombreCompleto: newUser.nombre || createData.nombreCompleto,
+          id: newUser.id
+        };
+        setUserList([...userList, createdUser]);
         setShowCreate(false);
-        setCreateData({ nombre: '', tipo_usuario: 'paciente', email: '', estado: 'activo', contrasena: '' });
+        setCreateData({ username: '', nombreCompleto: '', email: '', password: '', tipo_usuario: 'paciente', estado: 'activo', edad: '', telefono: '', fecha_nacimiento: '' });
         Swal.fire('Creado', 'El usuario ha sido creado.', 'success');
       } else {
         const error = await response.json();
-        Swal.fire('Error', error.message || 'No se pudo crear el usuario', 'error');
+        Swal.fire('Error', error.error || 'No se pudo crear el usuario', 'error');
       }
     } catch (error) {
       console.error('Error:', error);
@@ -206,7 +229,7 @@ export default function UserManagement() {
                 {filteredUsers.map(user => (
                   <tr key={user.id} className="border-b border-gray-200 hover:bg-gray-50">
                     <td className="px-4 py-4">
-                      <div className="font-semibold text-gray-800">{user.nombre}</div>
+                      <div className="font-semibold text-gray-800">{user.nombreCompleto}</div>
                     </td>
                     <td className="px-4 py-4 text-gray-700">
                       {user.tipo_usuario === 'paciente' ? 'Paciente' : user.tipo_usuario === 'healthcare' ? 'Doctor' : 'Admin'}
@@ -232,50 +255,57 @@ export default function UserManagement() {
         </div>
         {editingUser && (
           <div className="fixed inset-0 bg-black bg-opacity-40 flex items-center justify-center z-50">
-            <div className="bg-white rounded-lg shadow-xl p-8 w-full max-w-md relative">
+            <div className="bg-white rounded-lg shadow-xl p-8 w-full max-w-md relative max-h-[90vh] overflow-y-auto">
               <button onClick={() => setEditingUser(null)} className="absolute top-4 right-4 text-gray-500 hover:text-red-500">
                 <X size={24} />
               </button>
               <h2 className="text-2xl font-bold mb-4">Editar Usuario</h2>
               <form onSubmit={handleEditSave} className="space-y-4">
-                <input name="nombre" type="text" value={editData.nombre || ''} onChange={handleEditChange} placeholder="Nombre completo" className="w-full px-4 py-2 border rounded" />
+                <input name="nombreCompleto" type="text" value={editData.nombreCompleto || editData.nombre || ''} onChange={handleEditChange} placeholder="Nombre completo" className="w-full px-4 py-2 border rounded" />
+                <input name="email" type="email" value={editData.email || ''} onChange={handleEditChange} placeholder="Correo electrónico" className="w-full px-4 py-2 border rounded" />
                 <select name="tipo_usuario" value={editData.tipo_usuario || 'paciente'} onChange={handleEditChange} className="w-full px-4 py-2 border rounded">
                   <option value="paciente">Paciente</option>
                   <option value="healthcare">Doctor</option>
                   <option value="admin">Admin</option>
                 </select>
-                <input name="email" type="email" value={editData.email || ''} onChange={handleEditChange} placeholder="Correo electrónico" className="w-full px-4 py-2 border rounded" />
+                <input name="edad" type="number" value={editData.edad || ''} onChange={handleEditChange} placeholder="Edad" className="w-full px-4 py-2 border rounded" />
+                <input name="telefono" type="text" value={editData.telefono || ''} onChange={handleEditChange} placeholder="Teléfono" className="w-full px-4 py-2 border rounded" />
+                <input name="fecha_nacimiento" type="date" value={editData.fecha_nacimiento || ''} onChange={handleEditChange} className="w-full px-4 py-2 border rounded" />
                 <select name="estado" value={editData.estado || 'activo'} onChange={handleEditChange} className="w-full px-4 py-2 border rounded">
                   <option value="activo">Activo</option>
                   <option value="inactivo">Inactivo</option>
                 </select>
-                <input name="contrasena" type="password" value={editData.contrasena || ''} onChange={handleEditChange} placeholder="Contraseña (dejar vacío para no cambiar)" className="w-full px-4 py-2 border rounded" />
-                <button type="submit" className="bg-primary text-white px-6 py-2 rounded">Guardar Cambios</button>
+                <input name="password" type="password" value={editData.password || ''} onChange={handleEditChange} placeholder="Contraseña (dejar vacío para no cambiar)" className="w-full px-4 py-2 border rounded" />
+                <button type="submit" className="w-full bg-primary text-white px-6 py-2 rounded">Guardar Cambios</button>
               </form>
             </div>
           </div>
         )}
         {showCreate && (
           <div className="fixed inset-0 bg-black bg-opacity-40 flex items-center justify-center z-50">
-            <div className="bg-white rounded-lg shadow-xl p-8 w-full max-w-md relative">
+            <div className="bg-white rounded-lg shadow-xl p-8 w-full max-w-md relative max-h-[90vh] overflow-y-auto">
               <button onClick={() => setShowCreate(false)} className="absolute top-4 right-4 text-gray-500 hover:text-red-500">
                 <X size={24} />
               </button>
               <h2 className="text-2xl font-bold mb-4">Crear Usuario</h2>
               <form onSubmit={handleCreateSave} className="space-y-4">
-                <input name="nombre" type="text" value={createData.nombre} onChange={handleCreateChange} placeholder="Nombre completo" className="w-full px-4 py-2 border rounded" required />
+                <input name="username" type="text" value={createData.username} onChange={handleCreateChange} placeholder="Usuario (nombre de usuario)" className="w-full px-4 py-2 border rounded" required />
+                <input name="nombreCompleto" type="text" value={createData.nombreCompleto} onChange={handleCreateChange} placeholder="Nombre completo" className="w-full px-4 py-2 border rounded" required />
+                <input name="email" type="email" value={createData.email} onChange={handleCreateChange} placeholder="Correo electrónico" className="w-full px-4 py-2 border rounded" required />
+                <input name="password" type="password" value={createData.password} onChange={handleCreateChange} placeholder="Contraseña" className="w-full px-4 py-2 border rounded" required />
                 <select name="tipo_usuario" value={createData.tipo_usuario} onChange={handleCreateChange} className="w-full px-4 py-2 border rounded">
                   <option value="paciente">Paciente</option>
                   <option value="healthcare">Doctor</option>
                   <option value="admin">Admin</option>
                 </select>
-                <input name="email" type="email" value={createData.email} onChange={handleCreateChange} placeholder="Correo electrónico" className="w-full px-4 py-2 border rounded" required />
+                <input name="edad" type="number" value={createData.edad} onChange={handleCreateChange} placeholder="Edad" className="w-full px-4 py-2 border rounded" />
+                <input name="telefono" type="text" value={createData.telefono} onChange={handleCreateChange} placeholder="Teléfono" className="w-full px-4 py-2 border rounded" />
+                <input name="fecha_nacimiento" type="date" value={createData.fecha_nacimiento} onChange={handleCreateChange} className="w-full px-4 py-2 border rounded" />
                 <select name="estado" value={createData.estado} onChange={handleCreateChange} className="w-full px-4 py-2 border rounded">
                   <option value="activo">Activo</option>
                   <option value="inactivo">Inactivo</option>
                 </select>
-                <input name="contrasena" type="password" value={createData.contrasena} onChange={handleCreateChange} placeholder="Contraseña" className="w-full px-4 py-2 border rounded" required />
-                <button type="submit" className="bg-primary text-white px-6 py-2 rounded">Crear Usuario</button>
+                <button type="submit" className="w-full bg-primary text-white px-6 py-2 rounded">Crear Usuario</button>
               </form>
             </div>
           </div>
