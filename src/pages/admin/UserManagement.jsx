@@ -3,7 +3,6 @@ import Logo from '../../components/common/Logo';
 import { Pencil, Trash, X, UserPlus } from 'lucide-react';
 import { useAuth } from '../../contexts/AuthContext';
 import Swal from 'sweetalert2';
-import { useEffect } from "react";
 
 const users = [
   { id: 1, name: 'Juan Pérez García', role: 'patient', email: 'juan.perez@email.com', phone: '+52 123 456 7890', status: 'active', password: '123456' },
@@ -14,44 +13,12 @@ const users = [
 
 export default function UserManagement() {
   const [searchTerm, setSearchTerm] = useState('');
-  const [userList, setUserList] = useState([]);
+  const [userList, setUserList] = useState(users);
   const [editingUser, setEditingUser] = useState(null);
   const [editData, setEditData] = useState({});
   const [showCreate, setShowCreate] = useState(false);
   const [createData, setCreateData] = useState({ name: '', role: 'patient', email: '', phone: '', status: 'active', password: '' });
   const { logout } = useAuth();
-
-  // Obtener token de localStorage
-  const token = localStorage.getItem('biopsyche_token');
-
-  // Cargar usuarios reales al montar el componente
-  useEffect(() => {
-    const fetchUsers = async () => {
-      try {
-        const res = await fetch('/api/usuarios', {
-          headers: {
-            'Authorization': `Bearer ${token}`
-          }
-        });
-        if (!res.ok) throw new Error('Error al obtener usuarios');
-        const data = await res.json();
-        console.log('USUARIOS API:', data);
-        // Mapear los datos a la estructura esperada por la tabla
-        setUserList(data.map(u => ({
-          id: u.id,
-          name: u.nombreCompleto,
-          role: u.tipo_usuario,
-          email: u.email,
-          phone: u.telefono,
-          status: u.estado,
-          password: '••••••••' // Nunca mostrar la real
-        })));
-      } catch (err) {
-        Swal.fire('Error', err.message, 'error');
-      }
-    };
-    fetchUsers();
-  }, [token]);
 
   const filteredUsers = userList.filter(
     user => user.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -70,28 +37,8 @@ export default function UserManagement() {
       cancelButtonColor: '#3085d6',
     });
     if (result.isConfirmed) {
-      try {
-        const res = await fetch(`/api/usuarios/${id}`, {
-          method: 'DELETE',
-          headers: { 'Authorization': `Bearer ${token}` }
-        });
-        if (!res.ok) throw new Error('Error al eliminar usuario');
-        // Refrescar lista
-        const updated = await fetch('/api/usuarios', { headers: { 'Authorization': `Bearer ${token}` } });
-        const data = await updated.json();
-        setUserList(data.map(u => ({
-          id: u.id,
-          name: u.nombreCompleto,
-          role: u.tipo_usuario,
-          email: u.email,
-          phone: u.telefono,
-          status: u.estado,
-          password: '••••••••'
-        })));
-        Swal.fire('Eliminado', 'El usuario ha sido eliminado.', 'success');
-      } catch (err) {
-        Swal.fire('Error', err.message, 'error');
-      }
+      setUserList(userList.filter(u => u.id !== id));
+      Swal.fire('Eliminado', 'El usuario ha sido eliminado.', 'success');
     }
   };
 
@@ -117,45 +64,9 @@ export default function UserManagement() {
       cancelButtonColor: '#d33',
     });
     if (result.isConfirmed) {
-      try {
-        // Mapear roles frontend a backend
-        const roleMap = {
-          'patient': 'paciente',
-          'healthcare': 'healthcare',
-          'admin': 'admin'
-        };
-        
-        const res = await fetch(`/api/usuarios/${editData.id}`, {
-          method: 'PUT',
-          headers: {
-            'Content-Type': 'application/json',
-            'Authorization': `Bearer ${token}`
-          },
-          body: JSON.stringify({
-            nombreCompleto: editData.name,
-            telefono: editData.phone,
-            tipo_usuario: roleMap[editData.role] || editData.role,
-            estado: editData.status
-          })
-        });
-        if (!res.ok) throw new Error('Error al actualizar usuario');
-        // Refrescar lista
-        const updated = await fetch('/api/usuarios', { headers: { 'Authorization': `Bearer ${token}` } });
-        const data = await updated.json();
-        setUserList(data.map(u => ({
-          id: u.id,
-          name: u.nombreCompleto,
-          role: u.tipo_usuario,
-          email: u.email,
-          phone: u.telefono,
-          status: u.estado,
-          password: '••••••••'
-        })));
-        setEditingUser(null);
-        Swal.fire('Guardado', 'Los datos del usuario han sido actualizados.', 'success');
-      } catch (err) {
-        Swal.fire('Error', err.message, 'error');
-      }
+      setUserList(userList.map(u => u.id === editData.id ? { ...editData } : u));
+      setEditingUser(null);
+      Swal.fire('Guardado', 'Los datos del usuario han sido actualizados.', 'success');
     }
   };
 
@@ -164,52 +75,15 @@ export default function UserManagement() {
     setCreateData(prev => ({ ...prev, [name]: value }));
   };
 
-  const handleCreateSave = async (e) => {
+  const handleCreateSave = (e) => {
     e.preventDefault();
-    try {
-      // Mapear roles frontend a backend
-      const roleMap = {
-        'patient': 'paciente',
-        'healthcare': 'healthcare',
-        'admin': 'admin'
-      };
-      
-      // Backend espera: username, email, password, nombreCompleto, edad, telefono, tipo_usuario
-      const res = await fetch('/api/usuarios', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${token}`
-        },
-        body: JSON.stringify({
-          username: createData.email.split('@')[0],
-          email: createData.email,
-          password: createData.password,
-          nombreCompleto: createData.name,
-          edad: 0,
-          telefono: createData.phone,
-          tipo_usuario: roleMap[createData.role] || createData.role
-        })
-      });
-      if (!res.ok) throw new Error('Error al crear usuario');
-      // Refrescar lista
-      const updated = await fetch('/api/usuarios', { headers: { 'Authorization': `Bearer ${token}` } });
-      const data = await updated.json();
-      setUserList(data.map(u => ({
-        id: u.id,
-        name: u.nombreCompleto,
-        role: u.tipo_usuario,
-        email: u.email,
-        phone: u.telefono,
-        status: u.estado,
-        password: '••••••••'
-      })));
-      setShowCreate(false);
-      setCreateData({ name: '', role: 'patient', email: '', phone: '', status: 'active', password: '' });
-      Swal.fire('Creado', 'El usuario ha sido creado.', 'success');
-    } catch (err) {
-      Swal.fire('Error', err.message, 'error');
-    }
+    setUserList([
+      ...userList,
+      { ...createData, id: userList.length + 1 }
+    ]);
+    setShowCreate(false);
+    setCreateData({ name: '', role: 'patient', email: '', phone: '', status: 'active', password: '' });
+    Swal.fire('Creado', 'El usuario ha sido creado.', 'success');
   };
 
   return (
@@ -238,47 +112,41 @@ export default function UserManagement() {
             </div>
           </div>
           <div className="overflow-x-auto">
-            {filteredUsers.length === 0 ? (
-              <div className="text-center text-gray-500 py-8">No hay usuarios para mostrar.</div>
-            ) : (
-              <table className="w-full">
-                <thead>
-                  <tr className="bg-gray-100 border-b-2 border-gray-300">
-                    <th className="px-4 py-3 text-left text-sm font-semibold text-gray-700">Nombre</th>
-                    <th className="px-4 py-3 text-left text-sm font-semibold text-gray-700">Rol</th>
-                    <th className="px-4 py-3 text-left text-sm font-semibold text-gray-700">Correo</th>
-                    <th className="px-4 py-3 text-left text-sm font-semibold text-gray-700">Teléfono</th>
-                    <th className="px-4 py-3 text-left text-sm font-semibold text-gray-700">Estado</th>
-                    <th className="px-4 py-3 text-left text-sm font-semibold text-gray-700">Contraseña</th>
-                    <th className="px-4 py-3 text-center text-sm font-semibold text-gray-700">Acciones</th>
+            <table className="w-full">
+              <thead>
+                <tr className="bg-gray-100 border-b-2 border-gray-300">
+                  <th className="px-4 py-3 text-left text-sm font-semibold text-gray-700">Nombre</th>
+                  <th className="px-4 py-3 text-left text-sm font-semibold text-gray-700">Rol</th>
+                  <th className="px-4 py-3 text-left text-sm font-semibold text-gray-700">Correo</th>
+                  <th className="px-4 py-3 text-left text-sm font-semibold text-gray-700">Teléfono</th>
+                  <th className="px-4 py-3 text-left text-sm font-semibold text-gray-700">Estado</th>
+                  <th className="px-4 py-3 text-left text-sm font-semibold text-gray-700">Contraseña</th>
+                  <th className="px-4 py-3 text-center text-sm font-semibold text-gray-700">Acciones</th>
+                </tr>
+              </thead>
+              <tbody>
+                {filteredUsers.map(user => (
+                  <tr key={user.id} className="border-b border-gray-200 hover:bg-gray-50">
+                    <td className="px-4 py-4">
+                      <div className="font-semibold text-gray-800">{user.name}</div>
+                    </td>
+                    <td className="px-4 py-4 text-gray-700">{user.role === 'patient' ? 'Paciente' : 'Doctor'}</td>
+                    <td className="px-4 py-4 text-gray-700">{user.email}</td>
+                    <td className="px-4 py-4 text-gray-700">{user.phone}</td>
+                    <td className="px-4 py-4 text-gray-700">{user.status === 'active' ? 'Activo' : 'Inactivo'}</td>
+                    <td className="px-4 py-4 text-gray-700">{user.password}</td>
+                    <td className="px-4 py-4 text-center">
+                      <button onClick={() => handleEdit(user)} className="text-primary hover:text-blue-600 mr-2">
+                        <Pencil size={20} />
+                      </button>
+                      <button onClick={() => handleDelete(user.id)} className="text-red-500 hover:text-red-700">
+                        <Trash size={20} />
+                      </button>
+                    </td>
                   </tr>
-                </thead>
-                <tbody>
-                  {filteredUsers.map(user => (
-                    <tr key={user.id} className="border-b border-gray-200 hover:bg-gray-50">
-                      <td className="px-4 py-4">
-                        <div className="font-semibold text-gray-800">{user.name}</div>
-                      </td>
-                      <td className="px-4 py-4 text-gray-700">
-                        {user.role === 'admin' ? 'Administrador' : user.role === 'healthcare' ? 'Doctor' : 'Paciente'}
-                      </td>
-                      <td className="px-4 py-4 text-gray-700">{user.email}</td>
-                      <td className="px-4 py-4 text-gray-700">{user.phone}</td>
-                      <td className="px-4 py-4 text-gray-700">{user.status === 'activo' ? 'Activo' : 'Inactivo'}</td>
-                      <td className="px-4 py-4 text-gray-700">{user.password}</td>
-                      <td className="px-4 py-4 text-center">
-                        <button onClick={() => handleEdit(user)} className="text-primary hover:text-blue-600 mr-2">
-                          <Pencil size={20} />
-                        </button>
-                        <button onClick={() => handleDelete(user.id)} className="text-red-500 hover:text-red-700">
-                          <Trash size={20} />
-                        </button>
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            )}
+                ))}
+              </tbody>
+            </table>
           </div>
         </div>
         {editingUser && (

@@ -12,9 +12,9 @@ function authMiddleware(req, res, next) {
   }
 }
 
-function requireRole(role) {
+function requireRole(...roles) {
   return (req, res, next) => {
-    if (!req.user || req.user.tipo_usuario !== role) {
+    if (!req.user || !roles.includes(req.user.tipo_usuario)) {
       return res.status(403).json({ error: 'Acceso denegado' });
     }
     next();
