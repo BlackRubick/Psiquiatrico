@@ -1,3 +1,10 @@
+// IMPORTANTE: Cargar dotenv PRIMERO antes de cualquier require
+const path = require('path');
+require('dotenv').config({ path: path.resolve(__dirname, '.env') });
+
+console.log('✓ Dotenv cargado');
+console.log('DEBUG DB_DIALECT:', process.env.DB_DIALECT);
+
 const bcrypt = require('bcryptjs');
 const Usuario = require('./src/models/Usuario');
 const sequelize = require('./src/config/db');
