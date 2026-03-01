@@ -3,6 +3,11 @@ const Paciente = require('../models/Paciente');
 const Profesional = require('../models/Profesional');
 const Calificacion = require('../models/Calificacion');
 
+const isPacienteRole = (role) => {
+  const r = String(role || '').toLowerCase();
+  return r === 'paciente' || r === 'patient';
+};
+
 exports.getAll = async (req, res) => {
   try {
     const where = {};
@@ -13,7 +18,7 @@ exports.getAll = async (req, res) => {
     }
 
     // Si el usuario es paciente, solo puede ver sus propias actividades
-    if (req.user?.tipo_usuario === 'paciente') {
+    if (isPacienteRole(req.user?.tipo_usuario)) {
       const paciente = await Paciente.findOne({ where: { usuario_id: req.user.id } });
       if (!paciente) return res.status(404).json({ error: 'Paciente no encontrado' });
       where.paciente_id = paciente.id;
@@ -46,7 +51,7 @@ exports.getById = async (req, res) => {
     const actividad = await Actividad.findByPk(req.params.id, { include: [Paciente, Profesional, Calificacion] });
     if (!actividad) return res.status(404).json({ error: 'Actividad no encontrada' });
 
-    if (req.user?.tipo_usuario === 'paciente') {
+    if (isPacienteRole(req.user?.tipo_usuario)) {
       const paciente = await Paciente.findOne({ where: { usuario_id: req.user.id } });
       if (!paciente || actividad.paciente_id !== paciente.id) {
         return res.status(403).json({ error: 'Acceso denegado' });
