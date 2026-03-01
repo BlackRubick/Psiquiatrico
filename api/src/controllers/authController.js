@@ -11,7 +11,7 @@ exports.login = async (req, res) => {
     if (!valid) return res.status(400).json({ error: 'Contraseña incorrecta' });
     await user.update({ fecha_ultima_sesion: new Date() });
     const token = jwt.sign({ id: user.id, tipo_usuario: user.tipo_usuario, nombre: user.nombreCompleto }, process.env.JWT_SECRET, { expiresIn: '8h' });
-    res.json({ token, user: { id: user.id, nombre: user.nombreCompleto, tipo_usuario: user.tipo_usuario, email: user.email } });
+    res.json({ token, user: { id: user.id, nombreCompleto: user.nombreCompleto, tipo_usuario: user.tipo_usuario, email: user.email } });
   } catch (err) {
     res.status(500).json({ error: 'Error en login' });
   }
@@ -24,7 +24,7 @@ exports.register = async (req, res) => {
     if (exists) return res.status(400).json({ error: 'Email ya registrado' });
     const hash = await bcrypt.hash(password, 10);
     const user = await Usuario.create({ username, email, password: hash, nombreCompleto, edad, telefono, tipo_usuario });
-    res.status(201).json({ id: user.id, nombre: user.nombreCompleto, tipo_usuario: user.tipo_usuario, email: user.email });
+    res.status(201).json({ id: user.id, nombreCompleto: user.nombreCompleto, tipo_usuario: user.tipo_usuario, email: user.email });
   } catch (err) {
     res.status(500).json({ error: 'Error en registro' });
   }
