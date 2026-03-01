@@ -97,6 +97,10 @@ exports.remove = async (req, res) => {
 
 exports.complete = async (req, res) => {
   try {
+    if (!isPacienteRole(req.user?.tipo_usuario)) {
+      return res.status(403).json({ error: 'Solo pacientes pueden completar actividades' });
+    }
+
     const actividad = await Actividad.findByPk(req.params.id);
     if (!actividad) return res.status(404).json({ error: 'Actividad no encontrada' });
 
