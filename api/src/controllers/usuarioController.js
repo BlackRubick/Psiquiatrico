@@ -22,7 +22,7 @@ exports.getById = async (req, res) => {
 
 exports.create = async (req, res) => {
   try {
-    const { username, email, password, nombreCompleto, edad, telefono, tipo_usuario } = req.body;
+    const { username, email, password, nombreCompleto, edad, telefono, tipo_usuario, estado, fecha_nacimiento } = req.body;
 
     // Reglas de permisos:
     // - admin puede crear cualquier tipo
@@ -32,7 +32,17 @@ exports.create = async (req, res) => {
     }
 
     const hash = await bcrypt.hash(password, 10);
-    const user = await Usuario.create({ username, email, password: hash, nombreCompleto, edad, telefono, tipo_usuario });
+    const user = await Usuario.create({
+      username,
+      email,
+      password: hash,
+      nombreCompleto,
+      edad,
+      telefono,
+      tipo_usuario,
+      estado,
+      fecha_nacimiento,
+    });
     res.status(201).json({ id: user.id, nombre: user.nombreCompleto, tipo_usuario: user.tipo_usuario, email: user.email });
   } catch (err) {
     res.status(500).json({ error: 'Error al crear usuario' });
@@ -51,7 +61,7 @@ exports.update = async (req, res) => {
       return res.status(403).json({ error: 'Solo puedes actualizar usuarios tipo paciente' });
     }
 
-    const { nombreCompleto, edad, telefono, tipo_usuario, estado } = req.body;
+    const { nombreCompleto, edad, telefono, tipo_usuario, estado, email, fecha_nacimiento, password } = req.body;
 
     // healthcare no puede cambiar tipo_usuario
     const updatePayload = {
@@ -59,8 +69,14 @@ exports.update = async (req, res) => {
       edad,
       telefono,
       estado,
+      email,
+      fecha_nacimiento,
       ...(req.user?.tipo_usuario === 'admin' ? { tipo_usuario } : {}),
     };
+
+    if (password) {
+      updatePayload.password = await bcrypt.hash(password, 10);
+    }
 
     await user.update(updatePayload);
     res.json({ message: 'Usuario actualizado' });

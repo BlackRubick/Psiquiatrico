@@ -66,7 +66,11 @@ exports.remove = async (req, res) => {
   try {
     const paciente = await Paciente.findByPk(req.params.id);
     if (!paciente) return res.status(404).json({ error: 'Paciente no encontrado' });
+    const usuarioId = paciente.usuario_id;
     await paciente.destroy();
+    if (usuarioId) {
+      await Usuario.destroy({ where: { id: usuarioId } });
+    }
     res.json({ message: 'Paciente eliminado' });
   } catch (err) {
     res.status(500).json({ error: 'Error al eliminar paciente' });

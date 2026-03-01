@@ -9,6 +9,7 @@ exports.login = async (req, res) => {
     if (!user) return res.status(400).json({ error: 'Usuario no encontrado' });
     const valid = await bcrypt.compare(password, user.password);
     if (!valid) return res.status(400).json({ error: 'Contraseña incorrecta' });
+    await user.update({ fecha_ultima_sesion: new Date() });
     const token = jwt.sign({ id: user.id, tipo_usuario: user.tipo_usuario, nombre: user.nombreCompleto }, process.env.JWT_SECRET, { expiresIn: '8h' });
     res.json({ token, user: { id: user.id, nombre: user.nombreCompleto, tipo_usuario: user.tipo_usuario, email: user.email } });
   } catch (err) {

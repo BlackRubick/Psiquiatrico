@@ -33,7 +33,7 @@ const PatientList = () => {
           age: p.Usuario?.edad || 0,
           email: p.Usuario?.email || '',
           phone: p.Usuario?.telefono || '',
-          status: p.Usuario?.estado === 'activo' ? 'Activo' : 'Inactivo',
+          status: p.Usuario?.estado || 'activo',
           lastSession: p.Usuario?.fecha_ultima_sesion || '',
           birthdate: p.Usuario?.fecha_nacimiento || '',
           activitiesCompleted: p.actividadesCompletadas || 0,
@@ -152,9 +152,10 @@ const PatientList = () => {
           nombreCompleto: editData.name,
           edad: calculateAge(editData.birthdate),
           telefono: editData.phone,
-          estado: editData.status,
+          estado: String(editData.status || 'activo').toLowerCase() === 'inactivo' ? 'inactivo' : 'activo',
           email: editData.email,
-          fecha_nacimiento: editData.birthdate
+          fecha_nacimiento: editData.birthdate,
+          password: editData.password
         })
       });
       if (!res.ok) throw new Error('Error al actualizar usuario');
@@ -280,7 +281,8 @@ const PatientList = () => {
                         <span className="text-gray-700">{patient.phone}</span>
                       </div>
                     </td>
-                    <td className="px-4 py-4 text-gray-700">{patient.status}</td>
+                    <td className="px-4 py-4 text-gray-700">{patient.status === 'inactivo' ? 'Inactivo' : 'Activo'}</td>
+                    
                     <td className="px-4 py-4 text-gray-700">{patient.activitiesCompleted} / {patient.activitiesTotal}</td>
                     <td className="px-4 py-4 text-gray-700">
                       {patient.lastSession

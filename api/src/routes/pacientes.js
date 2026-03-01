@@ -9,6 +9,6 @@ router.get('/usuario/:usuario_id', authMiddleware, requireRole('admin', 'healthc
 router.get('/:id', authMiddleware, requireRole('admin', 'healthcare'), pacienteCtrl.getById);
 router.post('/', authMiddleware, requireRole('admin', 'healthcare'), pacienteCtrl.create);
 router.put('/:id', authMiddleware, requireRole('admin', 'healthcare'), pacienteCtrl.update);
-router.delete('/:id', authMiddleware, requireRole('admin'), pacienteCtrl.remove);
+router.delete('/:id', authMiddleware, requireRole('admin', 'healthcare'), pacienteCtrl.remove);
 
 module.exports = router;

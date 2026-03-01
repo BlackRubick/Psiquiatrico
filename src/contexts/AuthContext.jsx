@@ -140,8 +140,11 @@ export const AuthProvider = ({ children }) => {
   const logout = () => {
     setUser(null);
     setUserType(null);
+    setProfesionalId(null);
     localStorage.removeItem('biopsyche_user');
     localStorage.removeItem('biopsyche_userType');
+    localStorage.removeItem('biopsyche_token');
+    localStorage.removeItem('biopsyche_paciente_id');
   };
 
   const register = (userData, type) => {
