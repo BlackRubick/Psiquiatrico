@@ -28,6 +28,7 @@ const PatientList = () => {
         // Mapear datos para la tabla
         setPatients(data.map(p => ({
           id: p.id,
+          usuarioId: p.usuario_id,
           name: p.Usuario?.nombreCompleto || '',
           age: p.Usuario?.edad || 0,
           email: p.Usuario?.email || '',
@@ -113,6 +114,7 @@ const PatientList = () => {
       const data = await res.json();
       setPatients(data.map(p => ({
         id: p.id,
+        usuarioId: p.usuario_id,
         name: p.Usuario?.nombreCompleto || '',
         age: p.Usuario?.edad || 0,
         email: p.Usuario?.email || '',
@@ -140,7 +142,7 @@ const PatientList = () => {
     e.preventDefault();
     try {
       // Editar usuario
-      const res = await fetch(`/api/usuarios/${editData.id}`, {
+      const res = await fetch(`/api/usuarios/${editData.usuarioId}`, {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',
@@ -161,6 +163,7 @@ const PatientList = () => {
       const data = await updated.json();
       setPatients(data.map(p => ({
         id: p.id,
+        usuarioId: p.usuario_id,
         name: p.Usuario?.nombreCompleto || '',
         age: p.Usuario?.edad || 0,
         email: p.Usuario?.email || '',
@@ -201,6 +204,7 @@ const PatientList = () => {
         const data = await updated.json();
         setPatients(data.map(p => ({
           id: p.id,
+          usuarioId: p.usuario_id,
           name: p.Usuario?.nombreCompleto || '',
           age: p.Usuario?.edad || 0,
           email: p.Usuario?.email || '',

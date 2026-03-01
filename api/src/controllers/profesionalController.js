@@ -20,6 +20,26 @@ exports.getById = async (req, res) => {
   }
 };
 
+exports.getByUsuarioId = async (req, res) => {
+  try {
+    const usuarioId = Number(req.params.usuario_id);
+
+    if (req.user?.tipo_usuario === 'healthcare' && req.user.id !== usuarioId) {
+      return res.status(403).json({ error: 'Acceso denegado' });
+    }
+
+    const profesional = await Profesional.findOne({
+      where: { usuario_id: usuarioId },
+      include: [{ model: Usuario, attributes: { exclude: ['password'] } }],
+    });
+
+    if (!profesional) return res.status(404).json({ error: 'Profesional no encontrado' });
+    res.json(profesional);
+  } catch (err) {
+    res.status(500).json({ error: 'Error al obtener profesional' });
+  }
+};
+
 exports.create = async (req, res) => {
   try {
     // Se espera que el usuario ya exista y se pase usuario_id

@@ -20,6 +20,26 @@ exports.getById = async (req, res) => {
   }
 };
 
+exports.getByUsuarioId = async (req, res) => {
+  try {
+    const usuarioId = Number(req.params.usuario_id);
+
+    if (req.user?.tipo_usuario === 'paciente' && req.user.id !== usuarioId) {
+      return res.status(403).json({ error: 'Acceso denegado' });
+    }
+
+    const paciente = await Paciente.findOne({
+      where: { usuario_id: usuarioId },
+      include: [{ model: Usuario, attributes: { exclude: ['password'] } }],
+    });
+
+    if (!paciente) return res.status(404).json({ error: 'Paciente no encontrado' });
+    res.json(paciente);
+  } catch (err) {
+    res.status(500).json({ error: 'Error al obtener paciente' });
+  }
+};
+
 exports.create = async (req, res) => {
   try {
     // Se espera que el usuario ya exista y se pase usuario_id

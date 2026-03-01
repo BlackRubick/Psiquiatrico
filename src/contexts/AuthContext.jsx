@@ -40,9 +40,9 @@ export const AuthProvider = ({ children }) => {
     savePacienteId();
   }, [user, userType]);
 
-  // Crear profesional automáticamente si es healthcare y no existe
+  // Cargar profesional si es healthcare (sin crear automáticamente)
   useEffect(() => {
-    const createProfesionalIfNeeded = async () => {
+    const loadProfesionalIfExists = async () => {
       if (!user || String(userType).toLowerCase() !== 'healthcare') return;
       const token = localStorage.getItem('biopsyche_token');
       try {
@@ -53,28 +53,13 @@ export const AuthProvider = ({ children }) => {
           const data = await res.json();
           setProfesionalId(data.id);
         } else {
-          // Si no existe, crear profesional automáticamente
-          const createRes = await fetch('/api/profesionales', {
-            method: 'POST',
-            headers: {
-              'Content-Type': 'application/json',
-              'Authorization': `Bearer ${token}`
-            },
-            body: JSON.stringify({
-              usuario_id: user.id,
-              especialidad: 'General',
-              cedula: 'AUTO-' + user.id
-            })
-          });
-          if (!createRes.ok) throw new Error('No se pudo crear el profesional');
-          const newProf = await createRes.json();
-          setProfesionalId(newProf.id);
+          setProfesionalId(null);
         }
       } catch (err) {
         setProfesionalId(null);
       }
     };
-    createProfesionalIfNeeded();
+    loadProfesionalIfExists();
   }, [user, userType]);
 
 
