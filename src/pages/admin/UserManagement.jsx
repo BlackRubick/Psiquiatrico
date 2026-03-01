@@ -118,6 +118,13 @@ export default function UserManagement() {
     });
     if (result.isConfirmed) {
       try {
+        // Mapear roles frontend a backend
+        const roleMap = {
+          'patient': 'paciente',
+          'healthcare': 'healthcare',
+          'admin': 'admin'
+        };
+        
         const res = await fetch(`/api/usuarios/${editData.id}`, {
           method: 'PUT',
           headers: {
@@ -127,7 +134,7 @@ export default function UserManagement() {
           body: JSON.stringify({
             nombreCompleto: editData.name,
             telefono: editData.phone,
-            tipo_usuario: editData.role,
+            tipo_usuario: roleMap[editData.role] || editData.role,
             estado: editData.status
           })
         });
@@ -160,6 +167,13 @@ export default function UserManagement() {
   const handleCreateSave = async (e) => {
     e.preventDefault();
     try {
+      // Mapear roles frontend a backend
+      const roleMap = {
+        'patient': 'paciente',
+        'healthcare': 'healthcare',
+        'admin': 'admin'
+      };
+      
       // Backend espera: username, email, password, nombreCompleto, edad, telefono, tipo_usuario
       const res = await fetch('/api/usuarios', {
         method: 'POST',
@@ -174,7 +188,7 @@ export default function UserManagement() {
           nombreCompleto: createData.name,
           edad: 0,
           telefono: createData.phone,
-          tipo_usuario: createData.role
+          tipo_usuario: roleMap[createData.role] || createData.role
         })
       });
       if (!res.ok) throw new Error('Error al crear usuario');
