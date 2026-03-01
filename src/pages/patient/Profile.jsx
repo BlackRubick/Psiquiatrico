@@ -62,14 +62,18 @@ const Profile = () => {
                 <label className="text-sm text-gray-600 font-semibold">Nombre Completo</label>
                 <p className="text-lg text-gray-800">{user.nombreCompleto || 'No especificado'}</p>
               </div>
-              <div className="border-b border-gray-200 pb-3">
-                <label className="text-sm text-gray-600 font-semibold">Edad</label>
-                <p className="text-lg text-gray-800">{paciente.edad || user.edad || 'No especificado'} años</p>
-              </div>
-              <div className="border-b border-gray-200 pb-3">
-                <label className="text-sm text-gray-600 font-semibold">Número Telefónico</label>
-                <p className="text-lg text-gray-800">{paciente.celular_tutor || paciente.telefono || user.telefono || 'No especificado'}</p>
-              </div>
+              {(paciente.edad || user.edad) && (
+                <div className="border-b border-gray-200 pb-3">
+                  <label className="text-sm text-gray-600 font-semibold">Edad</label>
+                  <p className="text-lg text-gray-800">{paciente.edad || user.edad} años</p>
+                </div>
+              )}
+              {(paciente.celular_tutor || paciente.telefono || user.telefono) && (
+                <div className="border-b border-gray-200 pb-3">
+                  <label className="text-sm text-gray-600 font-semibold">Número Telefónico</label>
+                  <p className="text-lg text-gray-800">{paciente.celular_tutor || paciente.telefono || user.telefono}</p>
+                </div>
+              )}
               <div className="border-b border-gray-200 pb-3">
                 <label className="text-sm text-gray-600 font-semibold">Correo Electrónico</label>
                 <p className="text-lg text-gray-800">{user.email || 'No especificado'}</p>
