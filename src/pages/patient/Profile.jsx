@@ -3,15 +3,18 @@ import { ArrowLeft, Edit2 } from 'lucide-react';
 import { useAuth } from '../../contexts/AuthContext';
 import Logo from '../../components/common/Logo';
 import React from 'react';
+
 const Profile = () => {
   const navigate = useNavigate();
   const { user } = useAuth();
   const [paciente, setPaciente] = React.useState(null);
   const [error, setError] = React.useState("");
+
   React.useEffect(() => {
     const token = localStorage.getItem('biopsyche_token');
     const usuarioId = user?.id || localStorage.getItem('biopsyche_user_id');
     if (!usuarioId || !token) return;
+    
     fetch(`/api/pacientes/usuario/${usuarioId}`, {
       headers: { 'Authorization': `Bearer ${token}` }
     })
@@ -26,7 +29,7 @@ const Profile = () => {
         if (data) setPaciente(data);
       })
       .catch(() => setError('Error al cargar perfil'));
-  }, [user]);
+  }, [user?.id]);
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-gray-600 via-gray-700 to-gray-800 p-4">
@@ -53,23 +56,23 @@ const Profile = () => {
           </div>
 
           {error && <div className="text-red-600 mb-4">{error}</div>}
-          {paciente ? (
+          {paciente && user ? (
             <div className="space-y-4">
               <div className="border-b border-gray-200 pb-3">
                 <label className="text-sm text-gray-600 font-semibold">Nombre Completo</label>
-                <p className="text-lg text-gray-800">{paciente.nombreCompleto || 'No especificado'}</p>
+                <p className="text-lg text-gray-800">{user.nombreCompleto || 'No especificado'}</p>
               </div>
               <div className="border-b border-gray-200 pb-3">
                 <label className="text-sm text-gray-600 font-semibold">Edad</label>
-                <p className="text-lg text-gray-800">{paciente.edad || 'No especificado'} años</p>
+                <p className="text-lg text-gray-800">{paciente.edad || user.edad || 'No especificado'} años</p>
               </div>
               <div className="border-b border-gray-200 pb-3">
                 <label className="text-sm text-gray-600 font-semibold">Número Telefónico</label>
-                <p className="text-lg text-gray-800">{paciente.celular_tutor || paciente.telefono || 'No especificado'}</p>
+                <p className="text-lg text-gray-800">{paciente.celular_tutor || paciente.telefono || user.telefono || 'No especificado'}</p>
               </div>
               <div className="border-b border-gray-200 pb-3">
                 <label className="text-sm text-gray-600 font-semibold">Correo Electrónico</label>
-                <p className="text-lg text-gray-800">{paciente.email || 'No especificado'}</p>
+                <p className="text-lg text-gray-800">{user.email || 'No especificado'}</p>
               </div>
               {paciente.nombre_tutor && (
                 <div className="border-b border-gray-200 pb-3">
