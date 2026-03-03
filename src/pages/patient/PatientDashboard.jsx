@@ -17,7 +17,7 @@ const PatientDashboard = () => {
     },
     { 
       id: 'emotions', 
-      title: 'CONSEJOS DEL DÍA', 
+      title: 'EMOCIONES DEL DÍA', 
       icon: Heart, 
       color: 'bg-accent-orange',
       path: '/patient/emotions'
