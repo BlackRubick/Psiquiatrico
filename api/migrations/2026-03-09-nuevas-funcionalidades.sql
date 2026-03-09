@@ -21,7 +21,7 @@ CREATE TABLE IF NOT EXISTS citas (
   estado ENUM('pendiente', 'confirmada', 'completada', 'cancelada') DEFAULT 'pendiente',
   fecha_creacion DATETIME DEFAULT CURRENT_TIMESTAMP,
   FOREIGN KEY (paciente_id) REFERENCES pacientes(id) ON DELETE CASCADE,
-  FOREIGN KEY (profesional_id) REFERENCES profesionales(id) ON DELETE CASCADE,
+  FOREIGN KEY (profesional_id) REFERENCES profesionales_salud(id) ON DELETE CASCADE,
   INDEX idx_fecha (fecha),
   INDEX idx_paciente (paciente_id),
   INDEX idx_profesional (profesional_id)
