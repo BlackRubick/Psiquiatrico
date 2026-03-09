@@ -1,13 +1,55 @@
 -- Migración para agregar nuevas funcionalidades al sistema BIOPSYCHE
 -- Fecha: 9 de marzo de 2026
--- IMPORTANTE: Si alguna columna ya existe, simplemente ignora ese error específico
+-- Compatible con re-ejecución: evita errores por columnas ya existentes
 
 -- 1. Agregar nuevos campos a la tabla pacientes
--- Si las columnas ya existen, estos comandos darán error, pero puedes continuar
-ALTER TABLE pacientes ADD COLUMN contacto_emergencia VARCHAR(20);
-ALTER TABLE pacientes ADD COLUMN nombre_contacto_emergencia VARCHAR(150);
-ALTER TABLE pacientes ADD COLUMN peso_actual DECIMAL(5,2);
-ALTER TABLE pacientes ADD COLUMN altura DECIMAL(4,2);
+SET @sql = IF(
+  (SELECT COUNT(*) FROM information_schema.COLUMNS
+   WHERE TABLE_SCHEMA = DATABASE()
+     AND TABLE_NAME = 'pacientes'
+     AND COLUMN_NAME = 'contacto_emergencia') = 0,
+  'ALTER TABLE pacientes ADD COLUMN contacto_emergencia VARCHAR(20)',
+  'SELECT "contacto_emergencia ya existe"'
+);
+PREPARE stmt FROM @sql;
+EXECUTE stmt;
+DEALLOCATE PREPARE stmt;
+
+SET @sql = IF(
+  (SELECT COUNT(*) FROM information_schema.COLUMNS
+   WHERE TABLE_SCHEMA = DATABASE()
+     AND TABLE_NAME = 'pacientes'
+     AND COLUMN_NAME = 'nombre_contacto_emergencia') = 0,
+  'ALTER TABLE pacientes ADD COLUMN nombre_contacto_emergencia VARCHAR(150)',
+  'SELECT "nombre_contacto_emergencia ya existe"'
+);
+PREPARE stmt FROM @sql;
+EXECUTE stmt;
+DEALLOCATE PREPARE stmt;
+
+SET @sql = IF(
+  (SELECT COUNT(*) FROM information_schema.COLUMNS
+   WHERE TABLE_SCHEMA = DATABASE()
+     AND TABLE_NAME = 'pacientes'
+     AND COLUMN_NAME = 'peso_actual') = 0,
+  'ALTER TABLE pacientes ADD COLUMN peso_actual DECIMAL(5,2)',
+  'SELECT "peso_actual ya existe"'
+);
+PREPARE stmt FROM @sql;
+EXECUTE stmt;
+DEALLOCATE PREPARE stmt;
+
+SET @sql = IF(
+  (SELECT COUNT(*) FROM information_schema.COLUMNS
+   WHERE TABLE_SCHEMA = DATABASE()
+     AND TABLE_NAME = 'pacientes'
+     AND COLUMN_NAME = 'altura') = 0,
+  'ALTER TABLE pacientes ADD COLUMN altura DECIMAL(4,2)',
+  'SELECT "altura ya existe"'
+);
+PREPARE stmt FROM @sql;
+EXECUTE stmt;
+DEALLOCATE PREPARE stmt;
 
 -- 2. Crear tabla de citas
 CREATE TABLE IF NOT EXISTS citas (
