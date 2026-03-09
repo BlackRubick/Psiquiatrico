@@ -87,7 +87,7 @@ Esto sincronizará automáticamente los modelos con la base de datos.
 #### Opción B: Ejecutar SQL manualmente
 Si prefieres ejecutar el SQL manualmente:
 ```bash
-mysql -u tu_usuario -p tu_base_de_datos < api/migrations/2026-03-09-nuevas-funcionalidades.sql
+mysql -u cesar -p biopsyche < api/migrations/2026-03-09-nuevas-funcionalidades.sql
 ```
 
 ### 2. Reiniciar el Backend

@@ -1,12 +1,13 @@
 -- Migración para agregar nuevas funcionalidades al sistema BIOPSYCHE
 -- Fecha: 9 de marzo de 2026
+-- IMPORTANTE: Si alguna columna ya existe, simplemente ignora ese error específico
 
 -- 1. Agregar nuevos campos a la tabla pacientes
-ALTER TABLE pacientes 
-ADD COLUMN IF NOT EXISTS contacto_emergencia VARCHAR(20),
-ADD COLUMN IF NOT EXISTS nombre_contacto_emergencia VARCHAR(150),
-ADD COLUMN IF NOT EXISTS peso_actual DECIMAL(5,2),
-ADD COLUMN IF NOT EXISTS altura DECIMAL(4,2);
+-- Si las columnas ya existen, estos comandos darán error, pero puedes continuar
+ALTER TABLE pacientes ADD COLUMN contacto_emergencia VARCHAR(20);
+ALTER TABLE pacientes ADD COLUMN nombre_contacto_emergencia VARCHAR(150);
+ALTER TABLE pacientes ADD COLUMN peso_actual DECIMAL(5,2);
+ALTER TABLE pacientes ADD COLUMN altura DECIMAL(4,2);
 
 -- 2. Crear tabla de citas
 CREATE TABLE IF NOT EXISTS citas (
