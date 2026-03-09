@@ -12,12 +12,10 @@ exports.getAll = async (req, res) => {
   try {
     const where = {};
 
-    // Si llega filtro explícito por paciente
     if (req.query.paciente_id) {
       where.paciente_id = Number(req.query.paciente_id);
     }
 
-    // Si el usuario es paciente, solo puede ver sus propias actividades
     if (isPacienteRole(req.user?.tipo_usuario)) {
       const paciente = await Paciente.findOne({ where: { usuario_id: req.user.id } });
       if (!paciente) return res.status(404).json({ error: 'Paciente no encontrado' });
@@ -30,7 +28,6 @@ exports.getAll = async (req, res) => {
       order: [['fecha_asignacion', 'DESC']],
     });
 
-    // Compatibilidad con frontend (campos calculados en raíz)
     const payload = actividades.map((a) => {
       const raw = a.toJSON();
       return {

@@ -42,7 +42,6 @@ exports.getByUsuarioId = async (req, res) => {
 
 exports.create = async (req, res) => {
   try {
-    // Se espera que el usuario ya exista y se pase usuario_id
     const { usuario_id, ...rest } = req.body;
     const paciente = await Paciente.create({ usuario_id, ...rest });
     res.status(201).json(paciente);

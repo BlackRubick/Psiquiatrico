@@ -33,8 +33,6 @@ exports.getByUsuarioId = async (req, res) => {
       include: [{ model: Usuario, attributes: { exclude: ['password'] } }],
     });
 
-    // Si el usuario logueado es healthcare y aún no tiene perfil profesional,
-    // crearlo automáticamente para habilitar asignación de actividades.
     if (!profesional && req.user?.tipo_usuario === 'healthcare' && req.user.id === usuarioId) {
       const usuario = await Usuario.findByPk(usuarioId);
       if (!usuario) return res.status(404).json({ error: 'Usuario no encontrado' });
@@ -61,7 +59,6 @@ exports.getByUsuarioId = async (req, res) => {
 
 exports.create = async (req, res) => {
   try {
-    // Se espera que el usuario ya exista y se pase usuario_id
     const { usuario_id, ...rest } = req.body;
     const profesional = await Profesional.create({ usuario_id, ...rest });
     res.status(201).json(profesional);

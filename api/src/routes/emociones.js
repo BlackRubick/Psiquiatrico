@@ -3,7 +3,6 @@ const router = express.Router();
 const emocionCtrl = require('../controllers/emocionController');
 const { authMiddleware } = require('../middlewares/auth');
 
-// Paciente puede crear, healthcare/admin pueden ver y editar
 router.get('/', authMiddleware, emocionCtrl.getAll);
 router.get('/:id', authMiddleware, emocionCtrl.getById);
 router.post('/', authMiddleware, emocionCtrl.create);

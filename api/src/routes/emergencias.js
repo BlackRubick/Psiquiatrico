@@ -3,7 +3,6 @@ const router = express.Router();
 const emergenciaCtrl = require('../controllers/emergenciaController');
 const { authMiddleware } = require('../middlewares/auth');
 
-// Paciente puede crear, healthcare/admin pueden ver y editar
 router.get('/', authMiddleware, emergenciaCtrl.getAll);
 router.get('/:id', authMiddleware, emergenciaCtrl.getById);
 router.post('/', authMiddleware, emergenciaCtrl.create);

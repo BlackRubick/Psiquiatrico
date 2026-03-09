@@ -1,6 +1,6 @@
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../../contexts/AuthContext';
-import { ClipboardList, Users, User, BarChart3, MessageSquare, LogOut } from 'lucide-react';
+import { ClipboardList, Users, User, BarChart3, MessageSquare, LogOut, Calendar, Edit } from 'lucide-react';
 import Logo from '../../components/common/Logo';
 
 const HealthcareDashboard = () => {
@@ -16,11 +16,25 @@ const HealthcareDashboard = () => {
       path: '/healthcare/assign-activities'
     },
     { 
+      id: 'manage-activities', 
+      title: 'GESTIONAR\nACTIVIDADES', 
+      icon: Edit, 
+      color: 'bg-accent-purple',
+      path: '/healthcare/manage-activities'
+    },
+    { 
       id: 'patient-list', 
       title: 'LISTA DE PACIENTES', 
       icon: Users, 
       color: 'bg-accent-orange',
       path: '/healthcare/patients'
+    },
+    { 
+      id: 'appointments', 
+      title: 'CALENDARIO\nDE CITAS', 
+      icon: Calendar, 
+      color: 'bg-accent-pink',
+      path: '/healthcare/appointments'
     },
     { 
       id: 'profile', 

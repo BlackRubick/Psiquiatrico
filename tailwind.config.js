@@ -24,6 +24,8 @@ export default {
           cyan: '#8DD3E5',
           red: '#FF6B6B',
           gray: '#D3D3D3',
+          purple: '#C9A8E5',
+          pink: '#FFB3D9',
         },
       },
     },

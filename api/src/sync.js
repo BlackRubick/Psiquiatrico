@@ -1,4 +1,3 @@
-// IMPORTANTE: Cargar dotenv PRIMERO antes de cualquier otro require
 const path = require('path');
 const fs = require('fs');
 
@@ -8,7 +7,6 @@ console.log('Archivo existe:', fs.existsSync(envPath));
 
 require('dotenv').config({ path: envPath });
 
-// Verificar que las variables se cargaron
 console.log('DEBUG DB_DIALECT después de dotenv:', process.env.DB_DIALECT);
 console.log('DEBUG DB_HOST:', process.env.DB_HOST);
 
@@ -31,6 +29,8 @@ const EmocionDiaria = require('./models/EmocionDiaria');
 const Emergencia = require('./models/Emergencia');
 const ActividadCalma = require('./models/ActividadCalma');
 const DashboardMensual = require('./models/DashboardMensual');
+const Cita = require('./models/Cita');
+const VigilanciaPeso = require('./models/VigilanciaPeso');
 
 (async () => {
   try {

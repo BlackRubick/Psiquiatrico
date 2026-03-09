@@ -1,6 +1,6 @@
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../../contexts/AuthContext';
-import { Activity, Pill, User, Heart, AlertCircle, BookOpen, LogOut } from 'lucide-react';
+import { Activity, Pill, User, Heart, AlertCircle, BookOpen, LogOut, Calendar, Scale } from 'lucide-react';
 import Logo from '../../components/common/Logo';
 
 const PatientDashboard = () => {
@@ -35,6 +35,20 @@ const PatientDashboard = () => {
       icon: Pill, 
       color: 'bg-accent-green',
       path: '/patient/medication'
+    },
+    { 
+      id: 'appointments', 
+      title: 'CALENDARIO\nDE CITAS', 
+      icon: Calendar, 
+      color: 'bg-accent-purple',
+      path: '/patient/appointments'
+    },
+    { 
+      id: 'weight-tracking', 
+      title: 'VIGILANCIA\nDE PESO', 
+      icon: Scale, 
+      color: 'bg-accent-pink',
+      path: '/patient/weight-tracking'
     },
     { 
       id: 'tlp-info', 

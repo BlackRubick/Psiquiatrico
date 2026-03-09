@@ -78,12 +78,42 @@ const Profile = () => {
                 <label className="text-sm text-gray-600 font-semibold">Correo Electrónico</label>
                 <p className="text-lg text-gray-800">{user.email || 'No especificado'}</p>
               </div>
+              {paciente.direccion && (
+                <div className="border-b border-gray-200 pb-3">
+                  <label className="text-sm text-gray-600 font-semibold">Dirección de Vivienda</label>
+                  <p className="text-lg text-gray-800">{paciente.direccion}</p>
+                </div>
+              )}
+              {(paciente.peso_actual || paciente.altura) && (
+                <div className="border-b border-gray-200 pb-3">
+                  <label className="text-sm text-gray-600 font-semibold">Datos Físicos</label>
+                  <div className="flex gap-4">
+                    {paciente.peso_actual && (
+                      <p className="text-lg text-gray-800">Peso: {paciente.peso_actual} kg</p>
+                    )}
+                    {paciente.altura && (
+                      <p className="text-lg text-gray-800">Altura: {paciente.altura} m</p>
+                    )}
+                  </div>
+                </div>
+              )}
               {paciente.nombre_tutor && (
                 <div className="border-b border-gray-200 pb-3">
                   <label className="text-sm text-gray-600 font-semibold">Tutor</label>
                   <p className="text-lg text-gray-800">{paciente.nombre_tutor}</p>
                   {paciente.celular_tutor && (
                     <p className="text-sm text-gray-600">Tel: {paciente.celular_tutor}</p>
+                  )}
+                </div>
+              )}
+              {(paciente.nombre_contacto_emergencia || paciente.contacto_emergencia) && (
+                <div className="border-b border-gray-200 pb-3">
+                  <label className="text-sm text-gray-600 font-semibold">Contacto de Emergencia</label>
+                  {paciente.nombre_contacto_emergencia && (
+                    <p className="text-lg text-gray-800">{paciente.nombre_contacto_emergencia}</p>
+                  )}
+                  {paciente.contacto_emergencia && (
+                    <p className="text-sm text-gray-600">Tel: {paciente.contacto_emergencia}</p>
                   )}
                 </div>
               )}

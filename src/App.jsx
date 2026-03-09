@@ -12,6 +12,8 @@ import Emotions from './pages/patient/Emotions';
 import Emergency from './pages/patient/Emergency';
 import TLPInfo from './pages/patient/TLPInfo';
 import Profile from './pages/patient/Profile';
+import Appointments from './pages/patient/Appointments';
+import WeightTracking from './pages/patient/WeightTracking';
 
 import HealthcareDashboard from './pages/healthcare/HealthcareDashboard';
 import AssignActivities from './pages/healthcare/AssignActivities';
@@ -19,6 +21,8 @@ import PatientList from './pages/healthcare/PatientList';
 import Ratings from './pages/healthcare/Ratings';
 import Dashboards from './pages/healthcare/Dashboards';
 import HealthcareProfile from './pages/healthcare/HealthcareProfile';
+import AppointmentForm from './pages/healthcare/AppointmentForm';
+import ManageActivities from './pages/healthcare/ManageActivities';
 
 import AdminDashboard from './pages/admin/AdminDashboard';
 import UserManagement from './pages/admin/UserManagement';
@@ -116,6 +120,22 @@ function App() {
                 </ProtectedRoute>
               }
             />
+            <Route
+              path="/patient/appointments"
+              element={
+                <ProtectedRoute allowedType="patient">
+                  <Appointments />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/patient/weight-tracking"
+              element={
+                <ProtectedRoute allowedType="patient">
+                  <WeightTracking />
+                </ProtectedRoute>
+              }
+            />
 
             <Route
               path="/healthcare/dashboard"
@@ -162,6 +182,38 @@ function App() {
               element={
                 <ProtectedRoute allowedType="healthcare">
                   <HealthcareProfile />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/healthcare/appointments"
+              element={
+                <ProtectedRoute allowedType="healthcare">
+                  <Appointments />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/healthcare/appointments/new"
+              element={
+                <ProtectedRoute allowedType="healthcare">
+                  <AppointmentForm />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/healthcare/appointments/edit/:id"
+              element={
+                <ProtectedRoute allowedType="healthcare">
+                  <AppointmentForm />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/healthcare/manage-activities"
+              element={
+                <ProtectedRoute allowedType="healthcare">
+                  <ManageActivities />
                 </ProtectedRoute>
               }
             />

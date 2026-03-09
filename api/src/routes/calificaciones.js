@@ -3,7 +3,6 @@ const router = express.Router();
 const calificacionCtrl = require('../controllers/calificacionController');
 const { authMiddleware } = require('../middlewares/auth');
 
-// Paciente puede crear, healthcare/admin pueden ver y editar
 router.get('/', authMiddleware, calificacionCtrl.getAll);
 router.get('/:id', authMiddleware, calificacionCtrl.getById);
 router.post('/', authMiddleware, calificacionCtrl.create);

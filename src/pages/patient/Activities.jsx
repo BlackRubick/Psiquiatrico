@@ -16,14 +16,12 @@ const Activities = () => {
     const fetchPacienteIdAndActivities = async () => {
       if (!user) return;
       try {
-        // Usar el nuevo endpoint para obtener el paciente del usuario logueado
         const resPaciente = await fetch(`/api/pacientes/usuario/${user.id}`, {
           headers: { 'Authorization': `Bearer ${token}` }
         });
         if (!resPaciente.ok) throw new Error('Error al obtener paciente');
         const paciente = await resPaciente.json();
         setPacienteId(paciente.id);
-        // Obtener actividades asignadas al paciente
         const res = await fetch(`/api/actividades?paciente_id=${paciente.id}`, {
           headers: { 'Authorization': `Bearer ${token}` }
         });
@@ -48,12 +46,11 @@ const Activities = () => {
 
   const [selectedActivity, setSelectedActivity] = useState(null);
   const [file, setFile] = useState(null);
-  const [comment, setComment] = useState(''); // Para comentario sobre video/lectura
-  const [feelingComment, setFeelingComment] = useState(''); // Para cómo se sintió
+  const [comment, setComment] = useState('');
+  const [feelingComment, setFeelingComment] = useState('');
   const [rating, setRating] = useState(0);
 
   const handleSubmit = (activityId) => {
-    // Enviar datos al backend
     fetch(`/api/actividades/${activityId}`, {
       method: 'PATCH',
       headers: {
@@ -83,13 +80,11 @@ const Activities = () => {
             confirmButtonText: 'Aceptar',
             confirmButtonColor: '#4A90E2',
           });
-          // Refrescar actividades
           setSelectedActivity(null);
           setFile(null);
           setComment('');
           setFeelingComment('');
           setRating(0);
-          // Vuelve a cargar actividades
           if (pacienteId) {
             fetch(`/api/actividades?paciente_id=${pacienteId}`, {
               headers: { 'Authorization': `Bearer ${token}` }

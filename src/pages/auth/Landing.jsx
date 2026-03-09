@@ -25,10 +25,8 @@ const Landing = () => {
       setError(result.error || "Usuario o contraseña incorrectos");
       return;
     }
-    // La redirección se maneja en useEffect fuera de esta función
   };
 
-  // Redirigir automáticamente cuando userType cambie tras login exitoso
   const [hasNavigated, setHasNavigated] = useState(false);
   useEffect(() => {
     setHasNavigated(false);
@@ -89,10 +87,6 @@ const Landing = () => {
             </button>
             {error && <div className="text-red-500 text-sm mt-2">{error}</div>}
           </div>
-          {/* <div className="mt-6 text-xs text-gray-500">
-            <div>Datos de prueba:</div>
-            <div>Admin: admin@hotmail.com / Admin123123</div>
-          </div> */}
         </form>
       </div>
     </div>

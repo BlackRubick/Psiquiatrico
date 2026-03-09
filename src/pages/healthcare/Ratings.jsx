@@ -10,7 +10,6 @@ const Ratings = () => {
   const [patients, setPatients] = useState([]);
   const token = localStorage.getItem('biopsyche_token');
 
-  // Obtener pacientes y actividades completadas al montar
   React.useEffect(() => {
     const fetchPatients = async () => {
       try {
@@ -19,7 +18,6 @@ const Ratings = () => {
         });
         if (!res.ok) throw new Error('Error al obtener pacientes');
         const data = await res.json();
-        // Para cada paciente, obtener actividades completadas
         const pacientesConActividades = await Promise.all(
           data.map(async (p) => {
             const actividadesRes = await fetch(`/api/actividades?paciente_id=${p.id}`, {
@@ -55,7 +53,6 @@ const Ratings = () => {
         );
         setPatients(pacientesConActividades);
       } catch (err) {
-        // Puedes mostrar un error aquí si lo deseas
       }
     };
     fetchPatients();
@@ -106,7 +103,6 @@ const Ratings = () => {
 
           {selectedPatient ? (
             <div className="space-y-4">
-              {/* Actividades completadas con feedback */}
               {patients
                 .find((p) => p.id === selectedPatient)
                 ?.activities
@@ -165,7 +161,6 @@ const Ratings = () => {
                   </div>
                 ))}
 
-              {/* Actividades pendientes */}
               {patients
                 .find((p) => p.id === selectedPatient)
                 ?.activities
@@ -189,7 +184,6 @@ const Ratings = () => {
                   </div>
                 ))}
 
-              {/* Summary Stats */}
               <div className="mt-6 bg-blue-50 rounded-lg p-6">
                 <h3 className="font-semibold text-gray-800 mb-4">
                   Resumen de {patients.find((p) => p.id === selectedPatient)?.name}

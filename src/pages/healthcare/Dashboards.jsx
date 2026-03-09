@@ -19,7 +19,6 @@ const Dashboards = () => {
   const [medications, setMedications] = useState([]);
   const token = localStorage.getItem('biopsyche_token');
 
-  // Obtener pacientes al montar
   useEffect(() => {
     const fetchPatients = async () => {
       try {
@@ -34,14 +33,12 @@ const Dashboards = () => {
     fetchPatients();
   }, [token]);
 
-  // Obtener actividades y emociones del paciente y mes seleccionado
   useEffect(() => {
     if (!selectedPatient || !selectedMonth) return;
     setLoading(true);
     const [year, month] = selectedMonth.split('-');
     const fetchData = async () => {
       try {
-        // Actividades
         const actRes = await fetch(`/api/actividades?paciente_id=${selectedPatient}`, {
           headers: { 'Authorization': `Bearer ${token}` }
         });
@@ -53,7 +50,6 @@ const Dashboards = () => {
         });
         setActivities(filteredActs);
 
-        // Emociones
         const emoRes = await fetch(`/api/emociones`, {
           headers: { 'Authorization': `Bearer ${token}` }
         });
@@ -65,7 +61,6 @@ const Dashboards = () => {
         });
         setEmotions(filteredEmos);
 
-        // Emergencias
         const emgRes = await fetch(`/api/emergencias`, {
           headers: { 'Authorization': `Bearer ${token}` }
         });
@@ -77,7 +72,6 @@ const Dashboards = () => {
         });
         setEmergencies(filteredEmgs);
 
-        // Medicación tomada
         const medRes = await fetch(`/api/medicacion-tomada`, {
           headers: { 'Authorization': `Bearer ${token}` }
         });
@@ -102,17 +96,14 @@ const Dashboards = () => {
 
   const filteredPatients = patients.filter(p => p.name.toLowerCase().includes(patientSearch.toLowerCase()));
 
-  // Generar datos para gráficas a partir del dashboard
-  // Procesar actividades para gráfica
   const activitiesData = [
     {
       week: 'Mes',
       completadas: activities.length,
-      asignadas: activities.length // Si tienes asignadas por separado, cámbialo aquí
+      asignadas: activities.length
     }
   ];
 
-  // Procesar emociones para gráfica
   const emotionMap = {
     happy: 'Feliz',
     sad: 'Triste',
@@ -135,8 +126,6 @@ const Dashboards = () => {
     color: '#FFD966'
   }));
 
-  // Procesar emergencias para gráfica
-  // Agrupar por día del mes
   const emergencyData = [];
   if (emergencies.length > 0) {
     const dayCounts = {};
@@ -150,8 +139,6 @@ const Dashboards = () => {
     }
   }
 
-  // Procesar medicación para gráfica
-  // Adherencia: porcentaje de tomados sobre total
   const medicationData = [];
   if (medications.length > 0) {
     const total = medications.length;
@@ -245,9 +232,7 @@ const Dashboards = () => {
           </div>
         </div>
 
-        {/* Charts Grid */}
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-                    {/* Medication Adherence PieChart */}
                     <div className="bg-white rounded-lg shadow-xl p-6">
                       <h3 className="text-xl font-semibold text-gray-800 mb-4">
                         Adherencia Medicación
@@ -280,7 +265,6 @@ const Dashboards = () => {
                     </div>
           
 
-          {/* Activities Completed */}
           <div className="bg-white rounded-lg shadow-xl p-6">
             <h3 className="text-xl font-semibold text-gray-800 mb-4">
               Actividades Realizadas
@@ -305,7 +289,6 @@ const Dashboards = () => {
             </div>
           </div>
 
-          {/* Emergency Button Presses */}
           <div className="bg-white rounded-lg shadow-xl p-6">
             <h3 className="text-xl font-semibold text-gray-800 mb-4">
               Botón de Emergencia Activado
@@ -328,7 +311,6 @@ const Dashboards = () => {
             </div>
           </div>
 
-          {/* Emotions Distribution */}
           <div className="bg-white rounded-lg shadow-xl p-6">
             <h3 className="text-xl font-semibold text-gray-800 mb-4">
               Emociones Predominantes del Mes
@@ -363,14 +345,11 @@ const Dashboards = () => {
           </div>
         </div>
 
-        {/* Summary Card */}
         <div className="mt-6 bg-white rounded-lg shadow-xl p-6">
           <h3 className="text-xl font-semibold text-gray-800 mb-4">
             Resumen General del Mes
           </h3>
           <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-            {/* Adherencia Medicación card removed due to undefined medicationData. Uncomment and fix when data is available. */}
-            {/* Adherencia Medicación card moved to main charts grid */}
             <div className="bg-green-50 p-4 rounded-lg text-center">
               <div className="text-sm text-gray-600 mb-1">Actividades</div>
               <div className="text-2xl font-bold text-green-600">
@@ -378,15 +357,6 @@ const Dashboards = () => {
                    activitiesData.reduce((acc, d) => acc + d.asignadas, 0)) * 100).toFixed(0)}%
               </div>
             </div>
-            {/* Emergencias card removed due to undefined emergencyData. Uncomment and fix when data is available. */}
-            {/*
-            <div className="bg-red-50 p-4 rounded-lg text-center">
-              <div className="text-sm text-gray-600 mb-1">Emergencias</div>
-              <div className="text-2xl font-bold text-red-600">
-                {emergencyData.reduce((acc, d) => acc + d.count, 0)}
-              </div>
-            </div>
-            */}
             <div className="bg-purple-50 p-4 rounded-lg text-center">
               <div className="text-sm text-gray-600 mb-1">Estado General</div>
               <div className="text-xl font-bold text-purple-600">Estable</div>

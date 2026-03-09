@@ -8,6 +8,10 @@ const Paciente = sequelize.define('Paciente', {
   direccion: { type: DataTypes.STRING(255) },
   nombre_tutor: { type: DataTypes.STRING(150) },
   celular_tutor: { type: DataTypes.STRING(20) },
+  contacto_emergencia: { type: DataTypes.STRING(20) }, // Nuevo campo
+  nombre_contacto_emergencia: { type: DataTypes.STRING(150) }, // Nuevo campo
+  peso_actual: { type: DataTypes.DECIMAL(5, 2) }, // Nuevo campo (en kg)
+  altura: { type: DataTypes.DECIMAL(4, 2) }, // Nuevo campo (en metros, ej: 1.75)
   psicologo_tratante: { type: DataTypes.STRING(150) },
   fecha_diagnostico: { type: DataTypes.DATE },
   numero_sesiones_completadas: { type: DataTypes.INTEGER, defaultValue: 0 },

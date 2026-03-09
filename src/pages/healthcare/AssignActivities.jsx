@@ -5,15 +5,11 @@ import { ArrowLeft, Plus, X } from 'lucide-react';
 import Swal from 'sweetalert2';
 import Logo from '../../components/common/Logo';
 
-// ...existing code...
-
 const AssignActivities = () => {
   const navigate = useNavigate();
   const { user, profesionalId } = useAuth();
   const token = localStorage.getItem('biopsyche_token');
   const [patients, setPatients] = useState([]);
-    // Obtener profesional_id del usuario logueado
-    // ...el profesionalId ya viene del contexto
   const [selectedPatient, setSelectedPatient] = useState('');
   const [activityType, setActivityType] = useState('');
   const [frequency, setFrequency] = useState('');

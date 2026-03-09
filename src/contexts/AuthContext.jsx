@@ -20,7 +20,6 @@ export const AuthProvider = ({ children }) => {
     setLoading(false);
   }, []);
 
-  // Guardar pacienteId en localStorage si el usuario es paciente
   useEffect(() => {
     const savePacienteId = async () => {
       if (!user || String(userType).toLowerCase() !== 'paciente') return;
@@ -34,13 +33,11 @@ export const AuthProvider = ({ children }) => {
           localStorage.setItem('biopsyche_paciente_id', data.id);
         }
       } catch (err) {
-        // No guardar nada si falla
       }
     };
     savePacienteId();
   }, [user, userType]);
 
-  // Cargar profesional si es healthcare (sin crear automáticamente)
   useEffect(() => {
     const loadProfesionalIfExists = async () => {
       if (!user || String(userType).toLowerCase() !== 'healthcare') return;
@@ -80,7 +77,6 @@ export const AuthProvider = ({ children }) => {
         return { success: false, error: 'Respuesta inválida del servidor (no es JSON)' };
       }
       if (!res.ok) {
-        // Intentar login por username si el email falla
         const res2 = await fetch(API_URL, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
@@ -113,7 +109,6 @@ export const AuthProvider = ({ children }) => {
       localStorage.setItem('biopsyche_user', JSON.stringify(data.user));
       localStorage.setItem('biopsyche_userType', tipo);
       localStorage.setItem('biopsyche_token', data.token);
-      // Intentar guardar paciente_id si es paciente
       if (String(tipo).toLowerCase() === 'patient' || String(tipo).toLowerCase() === 'paciente') {
         try {
           const token = data.token;
@@ -128,7 +123,6 @@ export const AuthProvider = ({ children }) => {
             }
           }
         } catch (err) {
-          // No hacer nada si falla
         }
       }
       return { success: true };
@@ -152,7 +146,6 @@ export const AuthProvider = ({ children }) => {
     setUserType(type);
     localStorage.setItem('biopsyche_user', JSON.stringify(userData));
     localStorage.setItem('biopsyche_userType', type);
-    // Crear registro de paciente si es tipo paciente
     if (String(type).toLowerCase() === 'patient' || String(type).toLowerCase() === 'paciente') {
       const token = localStorage.getItem('biopsyche_token');
       const user = userData;

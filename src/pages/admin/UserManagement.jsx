@@ -24,7 +24,6 @@ export default function UserManagement() {
   });
   const { logout, token } = useAuth();
 
-  // Cargar usuarios de la API
   useEffect(() => {
     fetchUsers();
   }, []);

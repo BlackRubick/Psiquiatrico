@@ -3,7 +3,6 @@ const router = express.Router();
 const dashboardCtrl = require('../controllers/dashboardController');
 const { authMiddleware } = require('../middlewares/auth');
 
-// Healthcare/admin pueden ver y editar dashboards
 router.get('/', authMiddleware, dashboardCtrl.getAll);
 router.get('/:id', authMiddleware, dashboardCtrl.getById);
 router.post('/', authMiddleware, dashboardCtrl.create);

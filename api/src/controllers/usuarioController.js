@@ -24,9 +24,6 @@ exports.create = async (req, res) => {
   try {
     const { username, email, password, nombreCompleto, edad, telefono, tipo_usuario, estado, fecha_nacimiento } = req.body;
 
-    // Reglas de permisos:
-    // - admin puede crear cualquier tipo
-    // - healthcare solo puede crear pacientes
     if (req.user?.tipo_usuario === 'healthcare' && tipo_usuario !== 'paciente') {
       return res.status(403).json({ error: 'Solo puedes crear usuarios tipo paciente' });
     }
@@ -54,16 +51,12 @@ exports.update = async (req, res) => {
     const user = await Usuario.findByPk(req.params.id);
     if (!user) return res.status(404).json({ error: 'Usuario no encontrado' });
 
-    // Reglas de permisos:
-    // - admin puede actualizar cualquiera
-    // - healthcare solo puede actualizar pacientes
     if (req.user?.tipo_usuario === 'healthcare' && user.tipo_usuario !== 'paciente') {
       return res.status(403).json({ error: 'Solo puedes actualizar usuarios tipo paciente' });
     }
 
     const { nombreCompleto, edad, telefono, tipo_usuario, estado, email, fecha_nacimiento, password } = req.body;
 
-    // healthcare no puede cambiar tipo_usuario
     const updatePayload = {
       nombreCompleto,
       edad,

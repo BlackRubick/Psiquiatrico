@@ -1,4 +1,3 @@
-// IMPORTANTE: Cargar dotenv PRIMERO
 const path = require('path');
 require('dotenv').config({ path: path.resolve(__dirname, '../.env') });
 
@@ -9,7 +8,6 @@ const app = express();
 app.use(cors());
 app.use(express.json());
 
-// Rutas
 app.use('/api/auth', require('./routes/auth'));
 app.use('/api/usuarios', require('./routes/usuarios'));
 app.use('/api/pacientes', require('./routes/pacientes'));
@@ -22,6 +20,8 @@ app.use('/api/emergencias', require('./routes/emergencias'));
 app.use('/api/dashboards', require('./routes/dashboards'));
 app.use('/api/medicacion-tomada', require('./routes/medicacion-tomada'));
 app.use('/api/actividades-calma', require('./routes/actividades-calma'));
+app.use('/api/citas', require('./routes/citas'));
+app.use('/api/vigilancia-peso', require('./routes/vigilancia-peso'));
 
 app.get('/', (req, res) => {
   res.json({ message: 'API BIOPSYCHE funcionando' });

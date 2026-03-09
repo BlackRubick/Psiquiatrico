@@ -14,7 +14,6 @@ const PatientList = () => {
   const [patients, setPatients] = useState([]);
   const token = localStorage.getItem('biopsyche_token');
 
-  // Obtener pacientes al montar
   React.useEffect(() => {
     const fetchPatients = async () => {
       try {
@@ -25,7 +24,6 @@ const PatientList = () => {
         });
         if (!res.ok) throw new Error('Error al obtener pacientes');
         const data = await res.json();
-        // Mapear datos para la tabla
         setPatients(data.map(p => ({
           id: p.id,
           usuarioId: p.usuario_id,
@@ -76,7 +74,6 @@ const PatientList = () => {
   const handleCreateSave = async (e) => {
     e.preventDefault();
     try {
-      // Crear usuario primero
       const usuarioRes = await fetch('/api/usuarios', {
         method: 'POST',
         headers: {
@@ -97,7 +94,6 @@ const PatientList = () => {
       });
       if (!usuarioRes.ok) throw new Error('Error al crear usuario');
       const usuario = await usuarioRes.json();
-      // Crear paciente con usuario_id
       const pacienteRes = await fetch('/api/pacientes', {
         method: 'POST',
         headers: {
@@ -107,7 +103,6 @@ const PatientList = () => {
         body: JSON.stringify({ usuario_id: usuario.id })
       });
       if (!pacienteRes.ok) throw new Error('Error al crear paciente');
-      // Refrescar lista
       const res = await fetch('/api/pacientes', {
         headers: { 'Authorization': `Bearer ${token}` }
       });
@@ -141,7 +136,6 @@ const PatientList = () => {
   const handleEditSave = async (e) => {
     e.preventDefault();
     try {
-      // Editar usuario
       const res = await fetch(`/api/usuarios/${editData.usuarioId}`, {
         method: 'PUT',
         headers: {
@@ -159,7 +153,6 @@ const PatientList = () => {
         })
       });
       if (!res.ok) throw new Error('Error al actualizar usuario');
-      // Refrescar lista
       const updated = await fetch('/api/pacientes', { headers: { 'Authorization': `Bearer ${token}` } });
       const data = await updated.json();
       setPatients(data.map(p => ({
@@ -195,12 +188,10 @@ const PatientList = () => {
     });
     if (result.isConfirmed) {
       try {
-        // Eliminar usuario y paciente
         await fetch(`/api/pacientes/${id}`, {
           method: 'DELETE',
           headers: { 'Authorization': `Bearer ${token}` }
         });
-        // Refrescar lista
         const updated = await fetch('/api/pacientes', { headers: { 'Authorization': `Bearer ${token}` } });
         const data = await updated.json();
         setPatients(data.map(p => ({

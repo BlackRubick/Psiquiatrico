@@ -5,7 +5,6 @@ import { ArrowLeft, Plus, Trash2, Check } from 'lucide-react';
 import Logo from '../../components/common/Logo';
 
 const Medication = () => {
-    // Catálogo de medicamentos
     const [error, setError] = useState("");
     const catalogoMedicamentos = [
 { clave: '6298', nombre: 'Alprazolam 0.5 mg' },
@@ -193,30 +192,25 @@ const Medication = () => {
   const navigate = useNavigate();
   const [isSetup, setIsSetup] = useState(false);
   const [medications, setMedications] = useState([]);
-  const [medicationTaken, setMedicationTaken] = useState([]); // registros de medicacion-tomada
+  const [medicationTaken, setMedicationTaken] = useState([]);
   const token = localStorage.getItem('biopsyche_token');
   const pacienteId = localStorage.getItem('biopsyche_paciente_id');
 
   useEffect(() => {
-    // Cargar medicamentos y tomas desde la API
     const fetchData = async () => {
       try {
-        // Medicamentos asignados al paciente
         const medsRes = await fetch(`/api/medicamentos?paciente_id=${pacienteId}`, {
           headers: { 'Authorization': `Bearer ${token}` }
         });
         let medsData = medsRes.ok ? await medsRes.json() : [];
 
-        // Registros de medicación tomada
         const takenRes = await fetch(`/api/medicacion-tomada?paciente_id=${pacienteId}`, {
           headers: { 'Authorization': `Bearer ${token}` }
         });
         const takenData = takenRes.ok ? await takenRes.json() : [];
         setMedicationTaken(takenData);
 
-        // Inicializar schedules y taken en cada medicamento
         medsData = medsData.map(med => {
-          // schedules
           let schedules = { morning: false, afternoon: false, night: false };
           try {
             schedules = typeof med.schedules === 'string'
@@ -233,7 +227,6 @@ const Medication = () => {
               night: !!med.night,
             };
           }
-          // taken: construir objeto con los registros de medicación tomada
           const taken = {};
           takenData.forEach(reg => {
             if (reg.medicamento_id === med.id && reg.tomado) {
@@ -264,9 +257,7 @@ const Medication = () => {
 
   const handleAddMedication = () => {
     if (newMed.name && (newMed.morning || newMed.afternoon || newMed.night)) {
-      // Buscar clave del medicamento
       const medCat = catalogoMedicamentos.find(m => m.nombre === newMed.name);
-      // Obtener pacienteId actualizado de localStorage
       const pacienteIdActual = localStorage.getItem('biopsyche_paciente_id');
       const body = {
         nombre: newMed.name,
@@ -301,7 +292,6 @@ const Medication = () => {
       })
       .then(data => {
         if (!data) return;
-        // Asegurar schedules
         data.schedules = data.schedules || { morning: false, afternoon: false, night: false };
         setMedications([...medications, data]);
         setNewMed({ name: '', morning: false, afternoon: false, night: false });
@@ -314,7 +304,6 @@ const Medication = () => {
   };
 
   const handleRemoveMedication = (id) => {
-    // Eliminar en la API
     fetch(`/api/medicamentos/${id}`, {
       method: 'DELETE',
       headers: { 'Authorization': `Bearer ${token}` }
@@ -325,7 +314,6 @@ const Medication = () => {
   };
 
   const toggleMedicationTaken = (medId, day, time) => {
-    // Guardar toma en la API
     const med = medications.find(m => m.id === medId);
     if (!med) return;
     const fecha = new Date();

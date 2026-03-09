@@ -11,11 +11,9 @@ const Emotions = () => {
     afternoon: null,
     night: null,
   });
-  // Obtener paciente_id real del usuario actual
   const user = JSON.parse(localStorage.getItem('biopsyche_user') || '{}');
   const [pacienteId, setPacienteId] = useState(null);
   const token = localStorage.getItem('biopsyche_token');
-  // Al montar, obtener paciente_id
   React.useEffect(() => {
     if (!user?.id) return;
     fetch(`/api/pacientes/usuario/${user.id}`, {
