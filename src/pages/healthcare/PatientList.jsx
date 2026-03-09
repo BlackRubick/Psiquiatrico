@@ -9,7 +9,20 @@ const PatientList = () => {
   const [searchTerm, setSearchTerm] = useState('');
   const [showCreate, setShowCreate] = useState(false);
   const [showEdit, setShowEdit] = useState(false);
-  const [createData, setCreateData] = useState({ name: '', email: '', password: '', birthdate: '', phone: '' });
+  const [createData, setCreateData] = useState({ 
+    name: '', 
+    email: '', 
+    password: '', 
+    birthdate: '', 
+    phone: '',
+    direccion: '',
+    nombreTutor: '',
+    celularTutor: '',
+    contactoEmergencia: '',
+    nombreContactoEmergencia: '',
+    pesoActual: '',
+    altura: ''
+  });
   const [editData, setEditData] = useState({});
   const [patients, setPatients] = useState([]);
   const token = localStorage.getItem('biopsyche_token');
@@ -100,7 +113,16 @@ const PatientList = () => {
           'Content-Type': 'application/json',
           'Authorization': `Bearer ${token}`
         },
-        body: JSON.stringify({ usuario_id: usuario.id })
+        body: JSON.stringify({ 
+          usuario_id: usuario.id,
+          direccion: createData.direccion,
+          nombre_tutor: createData.nombreTutor,
+          celular_tutor: createData.celularTutor,
+          contacto_emergencia: createData.contactoEmergencia,
+          nombre_contacto_emergencia: createData.nombreContactoEmergencia,
+          peso_actual: createData.pesoActual ? parseFloat(createData.pesoActual) : null,
+          altura: createData.altura ? parseFloat(createData.altura) : null,
+        })
       });
       if (!pacienteRes.ok) throw new Error('Error al crear paciente');
       const res = await fetch('/api/pacientes', {
@@ -118,10 +140,28 @@ const PatientList = () => {
         lastSession: p.Usuario?.fecha_ultima_sesion || '',
         birthdate: p.Usuario?.fecha_nacimiento || '',
         activitiesCompleted: p.actividadesCompletadas || 0,
-        activitiesTotal: p.actividadesTotales || 0,
-      })));
+        activitiesTotal: p.actividadesTotales || 0,        direccion: p.direccion || '',
+        nombreTutor: p.nombre_tutor || '',
+        celularTutor: p.celular_tutor || '',
+        contactoEmergencia: p.contacto_emergencia || '',
+        nombreContactoEmergencia: p.nombre_contacto_emergencia || '',
+        pesoActual: p.peso_actual || '',
+        altura: p.altura || '',      })));
       setShowCreate(false);
-      setCreateData({ name: '', email: '', password: '', birthdate: '', phone: '' });
+      setCreateData({ 
+        name: '', 
+        email: '', 
+        password: '', 
+        birthdate: '', 
+        phone: '',
+        direccion: '',
+        nombreTutor: '',
+        celularTutor: '',
+        contactoEmergencia: '',
+        nombreContactoEmergencia: '',
+        pesoActual: '',
+        altura: ''
+      });
       Swal.fire('Creado', 'El paciente ha sido creado.', 'success');
     } catch (err) {
       Swal.fire('Error', err.message, 'error');
@@ -153,6 +193,25 @@ const PatientList = () => {
         })
       });
       if (!res.ok) throw new Error('Error al actualizar usuario');
+      
+      // Actualizar datos del paciente (dirección, contactos, peso, altura)
+      const resPaciente = await fetch(`/api/pacientes/${editData.id}`, {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`
+        },
+        body: JSON.stringify({
+          direccion: editData.direccion,
+          nombre_tutor: editData.nombreTutor,
+          celular_tutor: editData.celularTutor,
+          contacto_emergencia: editData.contactoEmergencia,
+          nombre_contacto_emergencia: editData.nombreContactoEmergencia,
+          peso_actual: editData.pesoActual ? parseFloat(editData.pesoActual) : null,
+          altura: editData.altura ? parseFloat(editData.altura) : null,
+        })
+      });
+      if (!resPaciente.ok) throw new Error('Error al actualizar datos del paciente');
       const updated = await fetch('/api/pacientes', { headers: { 'Authorization': `Bearer ${token}` } });
       const data = await updated.json();
       setPatients(data.map(p => ({
@@ -167,6 +226,13 @@ const PatientList = () => {
         birthdate: p.Usuario?.fecha_nacimiento || '',
         activitiesCompleted: p.actividadesCompletadas || 0,
         activitiesTotal: p.actividadesTotales || 0,
+        direccion: p.direccion || '',
+        nombreTutor: p.nombre_tutor || '',
+        celularTutor: p.celular_tutor || '',
+        contactoEmergencia: p.contacto_emergencia || '',
+        nombreContactoEmergencia: p.nombre_contacto_emergencia || '',
+        pesoActual: p.peso_actual || '',
+        altura: p.altura || '',
       })));
       setShowEdit(false);
       Swal.fire('Guardado', 'Los datos del paciente han sido actualizados.', 'success');
@@ -311,7 +377,7 @@ const PatientList = () => {
                 <h2 className="text-3xl font-bold text-primary mb-2">Nuevo Paciente</h2>
                 <p className="text-gray-600 text-center">Completa los datos para registrar un paciente en el sistema.</p>
               </div>
-              <form onSubmit={handleCreateSave} className="space-y-5">
+              <form onSubmit={handleCreateSave} className="space-y-4 max-h-[70vh] overflow-y-auto">
                 <div>
                   <label className="block text-sm font-semibold text-gray-700 mb-1">Nombre completo</label>
                   <input name="name" type="text" value={createData.name} onChange={handleCreateChange} placeholder="Ej. Juan Pérez García" className="w-full px-4 py-3 border-2 border-gray-300 rounded-lg focus:outline-none focus:border-primary" required />
@@ -332,7 +398,49 @@ const PatientList = () => {
                   <label className="block text-sm font-semibold text-gray-700 mb-1">Fecha de nacimiento</label>
                   <input name="birthdate" type="date" value={createData.birthdate} onChange={handleCreateChange} className="w-full px-4 py-3 border-2 border-gray-300 rounded-lg focus:outline-none focus:border-primary" required />
                 </div>
-                <button type="submit" className="w-full bg-primary text-white py-3 rounded-lg hover:bg-primary-dark transition-colors font-semibold text-lg shadow">
+                
+                {/* Nuevos campos */}
+                <div className="border-t-2 border-gray-200 pt-4 mt-4">
+                  <h3 className="text-lg font-bold text-gray-800 mb-3">📍 Información Adicional</h3>
+                  
+                  <div className="mb-3">
+                    <label className="block text-sm font-semibold text-gray-700 mb-1">Dirección de vivienda</label>
+                    <input name="direccion" type="text" value={createData.direccion} onChange={handleCreateChange} placeholder="Calle, número, colonia, ciudad" className="w-full px-4 py-3 border-2 border-gray-300 rounded-lg focus:outline-none focus:border-primary" />
+                  </div>
+                  
+                  <div className="mb-3">
+                    <label className="block text-sm font-semibold text-gray-700 mb-1">Nombre del tutor/pareja</label>
+                    <input name="nombreTutor" type="text" value={createData.nombreTutor} onChange={handleCreateChange} placeholder="Nombre completo" className="w-full px-4 py-3 border-2 border-gray-300 rounded-lg focus:outline-none focus:border-primary" />
+                  </div>
+                  
+                  <div className="mb-3">
+                    <label className="block text-sm font-semibold text-gray-700 mb-1">Teléfono del tutor/pareja</label>
+                    <input name="celularTutor" type="text" value={createData.celularTutor} onChange={handleCreateChange} placeholder="+52 123 456 7890" className="w-full px-4 py-3 border-2 border-gray-300 rounded-lg focus:outline-none focus:border-primary" />
+                  </div>
+                  
+                  <div className="mb-3">
+                    <label className="block text-sm font-semibold text-gray-700 mb-1">Nombre contacto de emergencia</label>
+                    <input name="nombreContactoEmergencia" type="text" value={createData.nombreContactoEmergencia} onChange={handleCreateChange} placeholder="Persona adicional a contactar" className="w-full px-4 py-3 border-2 border-gray-300 rounded-lg focus:outline-none focus:border-primary" />
+                  </div>
+                  
+                  <div className="mb-3">
+                    <label className="block text-sm font-semibold text-gray-700 mb-1">Teléfono de emergencia</label>
+                    <input name="contactoEmergencia" type="text" value={createData.contactoEmergencia} onChange={handleCreateChange} placeholder="+52 123 456 7890" className="w-full px-4 py-3 border-2 border-gray-300 rounded-lg focus:outline-none focus:border-primary" />
+                  </div>
+                  
+                  <div className="grid grid-cols-2 gap-3">
+                    <div>
+                      <label className="block text-sm font-semibold text-gray-700 mb-1">Peso actual (kg)</label>
+                      <input name="pesoActual" type="number" step="0.1" value={createData.pesoActual} onChange={handleCreateChange} placeholder="70.5" className="w-full px-4 py-3 border-2 border-gray-300 rounded-lg focus:outline-none focus:border-primary" />
+                    </div>
+                    <div>
+                      <label className="block text-sm font-semibold text-gray-700 mb-1">Altura (m)</label>
+                      <input name="altura" type="number" step="0.01" value={createData.altura} onChange={handleCreateChange} placeholder="1.75" className="w-full px-4 py-3 border-2 border-gray-300 rounded-lg focus:outline-none focus:border-primary" />
+                    </div>
+                  </div>
+                </div>
+                
+                <button type="submit" className="w-full bg-primary text-white py-3 rounded-lg hover:bg-primary-dark transition-colors font-semibold text-lg shadow sticky bottom-0">
                   Crear Paciente
                 </button>
               </form>
@@ -350,7 +458,7 @@ const PatientList = () => {
                 <h2 className="text-3xl font-bold text-primary mb-2">Editar Paciente</h2>
                 <p className="text-gray-600 text-center">Modifica los datos del paciente y la contraseña.</p>
               </div>
-              <form onSubmit={handleEditSave} className="space-y-5">
+              <form onSubmit={handleEditSave} className="space-y-4 max-h-[70vh] overflow-y-auto">
                 <div>
                   <label className="block text-sm font-semibold text-gray-700 mb-1">Nombre completo</label>
                   <input name="name" type="text" value={editData.name || ''} onChange={handleEditChange} className="w-full px-4 py-3 border-2 border-gray-300 rounded-lg focus:outline-none focus:border-primary" required />
@@ -371,7 +479,49 @@ const PatientList = () => {
                   <label className="block text-sm font-semibold text-gray-700 mb-1">Fecha de nacimiento</label>
                   <input name="birthdate" type="date" value={editData.birthdate || ''} onChange={handleEditChange} className="w-full px-4 py-3 border-2 border-gray-300 rounded-lg focus:outline-none focus:border-primary" required />
                 </div>
-                <button type="submit" className="w-full bg-primary text-white py-3 rounded-lg hover:bg-primary-dark transition-colors font-semibold text-lg shadow">
+                
+                {/* Nuevos campos */}
+                <div className="border-t-2 border-gray-200 pt-4 mt-4">
+                  <h3 className="text-lg font-bold text-gray-800 mb-3">📍 Información Adicional</h3>
+                  
+                  <div className="mb-3">
+                    <label className="block text-sm font-semibold text-gray-700 mb-1">Dirección de vivienda</label>
+                    <input name="direccion" type="text" value={editData.direccion || ''} onChange={handleEditChange} placeholder="Calle, número, colonia, ciudad" className="w-full px-4 py-3 border-2 border-gray-300 rounded-lg focus:outline-none focus:border-primary" />
+                  </div>
+                  
+                  <div className="mb-3">
+                    <label className="block text-sm font-semibold text-gray-700 mb-1">Nombre del tutor/pareja</label>
+                    <input name="nombreTutor" type="text" value={editData.nombreTutor || ''} onChange={handleEditChange} placeholder="Nombre completo" className="w-full px-4 py-3 border-2 border-gray-300 rounded-lg focus:outline-none focus:border-primary" />
+                  </div>
+                  
+                  <div className="mb-3">
+                    <label className="block text-sm font-semibold text-gray-700 mb-1">Teléfono del tutor/pareja</label>
+                    <input name="celularTutor" type="text" value={editData.celularTutor || ''} onChange={handleEditChange} placeholder="+52 123 456 7890" className="w-full px-4 py-3 border-2 border-gray-300 rounded-lg focus:outline-none focus:border-primary" />
+                  </div>
+                  
+                  <div className="mb-3">
+                    <label className="block text-sm font-semibold text-gray-700 mb-1">Nombre contacto de emergencia</label>
+                    <input name="nombreContactoEmergencia" type="text" value={editData.nombreContactoEmergencia || ''} onChange={handleEditChange} placeholder="Persona adicional a contactar" className="w-full px-4 py-3 border-2 border-gray-300 rounded-lg focus:outline-none focus:border-primary" />
+                  </div>
+                  
+                  <div className="mb-3">
+                    <label className="block text-sm font-semibold text-gray-700 mb-1">Teléfono de emergencia</label>
+                    <input name="contactoEmergencia" type="text" value={editData.contactoEmergencia || ''} onChange={handleEditChange} placeholder="+52 123 456 7890" className="w-full px-4 py-3 border-2 border-gray-300 rounded-lg focus:outline-none focus:border-primary" />
+                  </div>
+                  
+                  <div className="grid grid-cols-2 gap-3">
+                    <div>
+                      <label className="block text-sm font-semibold text-gray-700 mb-1">Peso actual (kg)</label>
+                      <input name="pesoActual" type="number" step="0.1" value={editData.pesoActual || ''} onChange={handleEditChange} placeholder="70.5" className="w-full px-4 py-3 border-2 border-gray-300 rounded-lg focus:outline-none focus:border-primary" />
+                    </div>
+                    <div>
+                      <label className="block text-sm font-semibold text-gray-700 mb-1">Altura (m)</label>
+                      <input name="altura" type="number" step="0.01" value={editData.altura || ''} onChange={handleEditChange} placeholder="1.75" className="w-full px-4 py-3 border-2 border-gray-300 rounded-lg focus:outline-none focus:border-primary" />
+                    </div>
+                  </div>
+                </div>
+                
+                <button type="submit" className="w-full bg-primary text-white py-3 rounded-lg hover:bg-primary-dark transition-colors font-semibold text-lg shadow sticky bottom-0">
                   Guardar Cambios
                 </button>
               </form>
