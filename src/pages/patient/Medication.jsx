@@ -308,8 +308,16 @@ const Medication = () => {
       method: 'DELETE',
       headers: { 'Authorization': `Bearer ${token}` }
     })
-    .then(() => {
+    .then(async (res) => {
+      if (!res.ok) {
+        const errorData = await res.json().catch(() => ({}));
+        throw new Error(errorData?.error || 'No se pudo eliminar el medicamento.');
+      }
       setMedications(medications.filter(med => med.id !== id));
+      setMedicationTaken(medicationTaken.filter(reg => reg.medicamento_id !== id));
+    })
+    .catch((err) => {
+      setError(err.message || 'No se pudo eliminar el medicamento.');
     });
   };
 

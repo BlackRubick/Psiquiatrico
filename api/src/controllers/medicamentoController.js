@@ -1,5 +1,7 @@
 const Medicamento = require('../models/Medicamento');
 const Paciente = require('../models/Paciente');
+const MedicacionTomada = require('../models/MedicacionTomada');
+const sequelize = require('../config/db');
 
 const isPacienteRole = (role) => {
   const r = String(role || '').toLowerCase();
@@ -149,9 +151,20 @@ exports.remove = async (req, res) => {
       }
     }
 
-    await medicamento.destroy();
+    await sequelize.transaction(async (t) => {
+      await MedicacionTomada.destroy({
+        where: { medicamento_id: medicamento.id },
+        transaction: t,
+      });
+
+      await medicamento.destroy({ transaction: t });
+    });
+
     res.json({ message: 'Medicamento eliminado' });
   } catch (err) {
-    res.status(500).json({ error: 'Error al eliminar medicamento' });
+    res.status(500).json({
+      error: 'Error al eliminar medicamento',
+      detail: err?.message,
+    });
   }
 };
