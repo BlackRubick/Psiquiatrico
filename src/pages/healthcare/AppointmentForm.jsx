@@ -73,6 +73,23 @@ const AppointmentForm = () => {
     };
 
     try {
+      const citasDiaRes = await fetch(`/api/citas?fecha_inicio=${formData.fecha}&fecha_fin=${formData.fecha}`, {
+        headers: { 'Authorization': `Bearer ${token}` }
+      });
+
+      const citasDia = citasDiaRes.ok ? await citasDiaRes.json() : [];
+      const conflicto = citasDia.find((c) =>
+        Number(c.profesional_id) === Number(profesionalId) &&
+        (c.hora || '').slice(0, 5) === formData.hora &&
+        c.estado !== 'cancelada' &&
+        (!isEdit || Number(c.id) !== Number(id))
+      );
+
+      if (conflicto) {
+        Swal.fire('Horario ocupado', 'Ya existe una cita en esa fecha y hora para este profesional.', 'error');
+        return;
+      }
+
       const url = isEdit ? `/api/citas/${id}` : '/api/citas';
       const method = isEdit ? 'PUT' : 'POST';
       
@@ -85,7 +102,13 @@ const AppointmentForm = () => {
         body: JSON.stringify(payload)
       });
 
-      if (!res.ok) throw new Error('Error al guardar la cita');
+      if (!res.ok) {
+        const errorData = await res.json().catch(() => ({}));
+        if (res.status === 409) {
+          throw new Error(errorData?.error || 'Ya existe una cita en ese horario');
+        }
+        throw new Error(errorData?.error || 'Error al guardar la cita');
+      }
 
       Swal.fire({
         title: '¡Éxito!',

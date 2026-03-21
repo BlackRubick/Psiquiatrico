@@ -2,6 +2,7 @@ const Cita = require('../models/Cita');
 const Paciente = require('../models/Paciente');
 const Profesional = require('../models/Profesional');
 const Usuario = require('../models/Usuario');
+const { Op } = require('sequelize');
 
 const isPacienteRole = (role) => {
   const r = String(role || '').toLowerCase();
@@ -85,6 +86,23 @@ exports.getById = async (req, res) => {
 
 exports.create = async (req, res) => {
   try {
+    const { profesional_id, fecha, hora } = req.body;
+
+    const citaExistente = await Cita.findOne({
+      where: {
+        profesional_id,
+        fecha,
+        hora,
+        estado: { [Op.ne]: 'cancelada' },
+      },
+    });
+
+    if (citaExistente) {
+      return res.status(409).json({
+        error: 'Ya existe una cita programada para ese profesional en la misma fecha y hora',
+      });
+    }
+
     const cita = await Cita.create(req.body);
     res.status(201).json(cita);
   } catch (err) {
@@ -97,6 +115,30 @@ exports.update = async (req, res) => {
   try {
     const cita = await Cita.findByPk(req.params.id);
     if (!cita) return res.status(404).json({ error: 'Cita no encontrada' });
+
+    const profesional_id = req.body.profesional_id ?? cita.profesional_id;
+    const fecha = req.body.fecha ?? cita.fecha;
+    const hora = req.body.hora ?? cita.hora;
+    const estado = req.body.estado ?? cita.estado;
+
+    if (estado !== 'cancelada') {
+      const citaExistente = await Cita.findOne({
+        where: {
+          id: { [Op.ne]: cita.id },
+          profesional_id,
+          fecha,
+          hora,
+          estado: { [Op.ne]: 'cancelada' },
+        },
+      });
+
+      if (citaExistente) {
+        return res.status(409).json({
+          error: 'Ya existe una cita programada para ese profesional en la misma fecha y hora',
+        });
+      }
+    }
+
     await cita.update(req.body);
     res.json({ message: 'Cita actualizada', cita });
   } catch (err) {
