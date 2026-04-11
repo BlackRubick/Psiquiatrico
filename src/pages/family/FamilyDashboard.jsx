@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../../contexts/AuthContext';
 import { useTheme } from '../../contexts/ThemeContext';
-import { ArrowLeft, Moon, Sun, LogOut, HeartPulse, Users, FileText, BellRing, ShieldAlert } from 'lucide-react';
+import { ArrowLeft, Moon, Sun, LogOut, HeartPulse, Users, FileText, BellRing, ShieldAlert, CalendarDays } from 'lucide-react';
 import Logo from '../../components/common/Logo';
 
 const FamilyDashboard = () => {
