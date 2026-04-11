@@ -35,7 +35,7 @@ const PatientDashboard = () => {
     { 
       id: 'medication', 
       title: 'MEDICACIÓN', 
-      icon: Pill, 
+      icon: null,
       color: 'bg-accent-gray',
       path: '/patient/medication'
     },
