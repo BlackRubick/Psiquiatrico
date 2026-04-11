@@ -1,7 +1,9 @@
 import { useNavigate, useLocation } from 'react-router-dom';
 import { useState, useEffect } from 'react';
 import { useAuth } from '../../contexts/AuthContext';
+import { useTheme } from '../../contexts/ThemeContext';
 import Logo from '../../components/common/Logo';
+import { Moon, Sun } from 'lucide-react';
 
 const testUsers = [
   { usernameOrEmail: 'admin', password: 'admin123', userType: 'admin' },
@@ -13,6 +15,7 @@ const Landing = () => {
   const navigate = useNavigate();
   const location = useLocation();
   const { login, userType, user } = useAuth();
+  const { isDark, toggleTheme } = useTheme();
   const [usernameOrEmail, setUsernameOrEmail] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
@@ -46,12 +49,12 @@ const Landing = () => {
     }
   }, [userType, user, location.pathname, hasNavigated, navigate]);
 
-  return (
-    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-gray-600 via-gray-700 to-gray-800 p-4">
-      <div className="max-w-md w-full">
-        <div className="text-center mb-8">
-          <Logo className="w-24 h-24 mx-auto mb-4" />
-          <h1 className="text-5xl font-bold text-white mb-2">
+  return ({`min-h-screen flex items-center justify-center p-4 transition-colors duration-300 ${
+      isDark 
+        ? 'bg-gradient-to-br from-gray-600 via-gray-700 to-gray-800' 
+        : 'bg-gradient-to-br from-blue-50 via-white to-blue-50'
+    }`}>
+      <button{`text-5xl font-bold mb-2 ${isDark ? 'text-white' : 'text-gray-800'}`}>
             BIO<span className="text-primary">PSYCHE</span>
           </h1>
           <div className="relative">
@@ -61,9 +64,37 @@ const Landing = () => {
           </div>
         </div>
 
-        <form onSubmit={handleLogin} className="bg-white rounded-lg shadow-xl p-8 space-y-4">
-          <h2 className="text-2xl font-semibold text-gray-800 text-center mb-6">
+        <form onSubmit={handleLogin} className={`rounded-lg shadow-xl p-8 space-y-4 transition-colors duration-300 ${
+          isDark 
+            ? 'bg-white' 
+            : 'bg-white border-2 border-gray-200'
+        }`}>
+          <h2 className={`text-2xl font-semibold text-center mb-6 ${isDark ? 'text-gray-800' : 'text-gray-700'}`}>
             Iniciar sesión
+          </h2>
+          <div className="space-y-3">
+            <input
+              type="text"
+              placeholder="Usuario o correo electrónico"
+              value={usernameOrEmail}
+              onChange={e => setUsernameOrEmail(e.target.value)}
+              className={`w-full px-4 py-3 border-2 rounded-lg focus:outline-none transition-colors ${
+                isDark
+                  ? 'border-gray-300 focus:border-primary bg-gray-50'
+                  : 'border-gray-300 focus:border-primary bg-white'
+              }`}
+              required
+            />
+            <input
+              type="password"
+              placeholder="Contraseña"
+              value={password}
+              onChange={e => setPassword(e.target.value)}
+              className={`w-full px-4 py-3 border-2 rounded-lg focus:outline-none transition-colors ${
+                isDark
+                  ? 'border-gray-300 focus:border-primary bg-gray-50'
+                  : 'border-gray-300 focus:border-primary bg-white'
+              }`}
           </h2>
           <div className="space-y-3">
             <input

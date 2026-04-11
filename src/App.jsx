@@ -1,5 +1,6 @@
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 import { AuthProvider, useAuth } from './contexts/AuthContext';
+import { ThemeProvider, useTheme } from './contexts/ThemeContext';
 import MainLayout from './layouts/MainLayout';
 
 import Landing from './pages/auth/Landing';
@@ -31,11 +32,16 @@ import Updates from './pages/admin/Updates';
 
 const ProtectedRoute = ({ children, allowedType }) => {
   const { user, userType, loading } = useAuth();
+  const { isDark } = useTheme();
 
   if (loading) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-gray-600 via-gray-700 to-gray-800">
-        <div className="text-white text-xl">Cargando...</div>
+      <div className={`min-h-screen flex items-center justify-center transition-colors duration-300 ${
+        isDark 
+          ? 'bg-gradient-to-br from-gray-600 via-gray-700 to-gray-800' 
+          : 'bg-gradient-to-br from-blue-50 via-white to-blue-50'
+      }`}>
+        <div className={`text-xl font-semibold ${isDark ? 'text-white' : 'text-gray-800'}`}>Cargando...</div>
       </div>
     );
   }
@@ -57,8 +63,9 @@ const ProtectedRoute = ({ children, allowedType }) => {
 
 function App() {
   return (
-    <AuthProvider>
-      <Router>
+    <ThemeProvider>
+      <AuthProvider>
+        <Router>
         <Routes>
           <Route element={<MainLayout />}>
             <Route path="/" element={<Landing />} />
@@ -226,8 +233,9 @@ function App() {
           </Route>
         </Routes>
       </Router>
-    </AuthProvider>
-  );
-}
+        </AuthProvider>
+      </ThemeProvider>
+    );
+  }
 
 export default App;
