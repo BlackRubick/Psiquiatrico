@@ -24,6 +24,7 @@ exports.create = async (req, res) => {
   try {
     const { username, email, password, nombreCompleto, edad, telefono, tipo_usuario, estado, fecha_nacimiento } = req.body;
     const normalizedType = String(tipo_usuario || '').toLowerCase().trim();
+    const normalizedAge = Number.isFinite(Number(edad)) ? Number(edad) : 0;
 
     if (!username || !email || !password || !nombreCompleto || !normalizedType) {
       return res.status(400).json({ error: 'Faltan campos obligatorios para crear el usuario' });
@@ -52,7 +53,7 @@ exports.create = async (req, res) => {
       email,
       password: hash,
       nombreCompleto,
-      edad,
+      edad: normalizedAge,
       telefono,
       tipo_usuario: normalizedType,
       estado,
