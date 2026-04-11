@@ -39,6 +39,27 @@ export const AuthProvider = ({ children }) => {
   }, [user, userType]);
 
   useEffect(() => {
+    const saveFamiliarPacienteId = async () => {
+      if (!user || String(userType).toLowerCase() !== 'familiar') return;
+      const token = localStorage.getItem('biopsyche_token');
+      try {
+        const res = await fetch('/api/familiares/mi-paciente', {
+          headers: { 'Authorization': `Bearer ${token}` }
+        });
+        if (res.ok) {
+          const data = await res.json();
+          const pacienteId = data?.paciente_id || data?.Paciente?.id || data?.paciente?.id;
+          if (pacienteId) {
+            localStorage.setItem('biopsyche_familiar_paciente_id', pacienteId);
+          }
+        }
+      } catch (err) {
+      }
+    };
+    saveFamiliarPacienteId();
+  }, [user, userType]);
+
+  useEffect(() => {
     const loadProfesionalIfExists = async () => {
       if (!user || String(userType).toLowerCase() !== 'healthcare') return;
       const token = localStorage.getItem('biopsyche_token');
@@ -139,6 +160,7 @@ export const AuthProvider = ({ children }) => {
     localStorage.removeItem('biopsyche_userType');
     localStorage.removeItem('biopsyche_token');
     localStorage.removeItem('biopsyche_paciente_id');
+    localStorage.removeItem('biopsyche_familiar_paciente_id');
   };
 
   const register = (userData, type) => {

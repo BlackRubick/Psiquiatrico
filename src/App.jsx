@@ -29,6 +29,7 @@ import AdminDashboard from './pages/admin/AdminDashboard';
 import UserManagement from './pages/admin/UserManagement';
 import Maintenance from './pages/admin/Maintenance';
 import Updates from './pages/admin/Updates';
+import FamilyDashboard from './pages/family/FamilyDashboard';
 
 const ProtectedRoute = ({ children, allowedType }) => {
   const { user, userType, loading } = useAuth();
@@ -53,6 +54,7 @@ const ProtectedRoute = ({ children, allowedType }) => {
   if (allowedType && userType !== allowedType) {
     if (userType === 'patient') return <Navigate to="/patient/dashboard" replace />;
     if (userType === 'healthcare') return <Navigate to="/healthcare/dashboard" replace />;
+    if (userType === 'familiar') return <Navigate to="/familiar/dashboard" replace />;
     if (userType === 'admin') return <Navigate to="/admin/dashboard" replace />;
     return <Navigate to="/" replace />;
   }
@@ -140,6 +142,23 @@ function App() {
               element={
                 <ProtectedRoute allowedType="patient">
                   <WeightTracking />
+                </ProtectedRoute>
+              }
+            />
+
+            <Route
+              path="/familiar/dashboard"
+              element={
+                <ProtectedRoute allowedType="familiar">
+                  <FamilyDashboard />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/familiar/tlp-info"
+              element={
+                <ProtectedRoute allowedType="familiar">
+                  <TLPInfo />
                 </ProtectedRoute>
               }
             />

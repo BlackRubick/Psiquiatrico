@@ -36,6 +36,7 @@ const Landing = () => {
     const normalizedType = String(userType).toLowerCase();
     if (normalizedType === "admin") target = "/admin/users";
     else if (normalizedType === "healthcare") target = "/healthcare/dashboard";
+    else if (normalizedType === "familiar") target = "/familiar/dashboard";
     else if (normalizedType === "patient" || normalizedType === "paciente") target = "/patient/dashboard";
     if (target) {
       setHasNavigated(true);

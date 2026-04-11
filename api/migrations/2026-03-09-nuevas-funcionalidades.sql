@@ -81,8 +81,33 @@ CREATE TABLE IF NOT EXISTS vigilancia_peso (
   INDEX idx_paciente_fecha (paciente_id, fecha)
 );
 
+-- 4. Agregar rol familiar y tabla de asignación paciente-familiar
+SET @sql = IF(
+  (SELECT COUNT(*) FROM information_schema.COLUMNS
+   WHERE TABLE_SCHEMA = DATABASE()
+     AND TABLE_NAME = 'usuarios'
+     AND COLUMN_NAME = 'tipo_usuario') = 1,
+  'ALTER TABLE usuarios MODIFY COLUMN tipo_usuario ENUM("paciente", "healthcare", "familiar", "admin") NOT NULL',
+  'SELECT "tipo_usuario ya configurado"'
+);
+PREPARE stmt FROM @sql;
+EXECUTE stmt;
+DEALLOCATE PREPARE stmt;
+
+CREATE TABLE IF NOT EXISTS asignaciones_paciente_familiar (
+  id INT AUTO_INCREMENT PRIMARY KEY,
+  familiar_usuario_id INT NOT NULL UNIQUE,
+  paciente_id INT NOT NULL UNIQUE,
+  fecha_asignacion DATETIME DEFAULT CURRENT_TIMESTAMP,
+  FOREIGN KEY (familiar_usuario_id) REFERENCES usuarios(id) ON DELETE CASCADE,
+  FOREIGN KEY (paciente_id) REFERENCES pacientes(id) ON DELETE CASCADE,
+  INDEX idx_familiar (familiar_usuario_id),
+  INDEX idx_paciente (paciente_id)
+);
+
 -- Comentarios sobre las nuevas funcionalidades:
 -- - contacto_emergencia y nombre_contacto_emergencia: Para contactar a tutores adicionales en emergencias
 -- - peso_actual y altura: Datos físicos del paciente, modificables
 -- - citas: Calendario de citas con fecha, hora y estado
 -- - vigilancia_peso: Historial de peso para monitoreo de efectos de medicación psiquiátrica
+-- - familiar: rol para red de apoyo con acceso a un solo paciente asignado

@@ -1,11 +1,15 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { ArrowLeft, ChevronDown, ChevronUp } from 'lucide-react';
+import { useAuth } from '../../contexts/AuthContext';
 import Logo from '../../components/common/Logo';
 
 const TLPInfo = () => {
   const navigate = useNavigate();
+  const { userType } = useAuth();
   const [expandedSection, setExpandedSection] = useState(null);
+
+  const backPath = String(userType || '').toLowerCase() === 'familiar' ? '/familiar/dashboard' : '/patient/dashboard';
 
   const sections = [
     {
@@ -127,7 +131,7 @@ GIVE (para mantener relaciones):
       <div className="max-w-4xl mx-auto">
         <div className="flex items-center gap-4 mb-6">
           <button
-            onClick={() => navigate('/patient/dashboard')}
+            onClick={() => navigate(backPath)}
             className="text-white hover:text-primary transition-colors"
           >
             <ArrowLeft size={32} />

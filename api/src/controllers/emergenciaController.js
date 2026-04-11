@@ -24,6 +24,15 @@ exports.getById = async (req, res) => {
 exports.create = async (req, res) => {
   try {
     const emergencia = await Emergencia.create(req.body);
+
+    const patient = await Paciente.findByPk(emergencia.paciente_id, {
+      include: [{ model: require('../models/Usuario'), attributes: { exclude: ['password'] } }],
+    });
+
+    if (patient?.contacto_emergencia) {
+      await emergencia.update({ telefonico_enviado_a: patient.contacto_emergencia });
+    }
+
     res.status(201).json(emergencia);
   } catch (err) {
     res.status(500).json({ error: 'Error al crear emergencia' });

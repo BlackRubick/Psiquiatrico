@@ -9,7 +9,7 @@ const Usuario = sequelize.define('Usuario', {
   nombreCompleto: { type: DataTypes.STRING(150), allowNull: false },
   edad: { type: DataTypes.INTEGER, allowNull: true },
   telefono: { type: DataTypes.STRING(20), allowNull: true },
-  tipo_usuario: { type: DataTypes.ENUM('paciente', 'healthcare', 'admin'), allowNull: false },
+  tipo_usuario: { type: DataTypes.ENUM('paciente', 'healthcare', 'familiar', 'admin'), allowNull: false },
   estado: { type: DataTypes.ENUM('activo', 'inactivo'), defaultValue: 'activo' },
   fecha_registro: { type: DataTypes.DATE, defaultValue: DataTypes.NOW },
   fecha_ultima_sesion: { type: DataTypes.DATE, allowNull: true },

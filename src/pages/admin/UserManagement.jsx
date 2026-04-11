@@ -11,6 +11,7 @@ export default function UserManagement() {
   const [editingUser, setEditingUser] = useState(null);
   const [editData, setEditData] = useState({});
   const [showCreate, setShowCreate] = useState(false);
+  const [patientOptions, setPatientOptions] = useState([]);
   const [createData, setCreateData] = useState({ 
     username: '', 
     nombreCompleto: '', 
@@ -20,13 +21,35 @@ export default function UserManagement() {
     estado: 'activo',
     edad: '',
     telefono: '',
-    fecha_nacimiento: ''
+    fecha_nacimiento: '',
+    paciente_asignado_id: ''
   });
   const { logout, token } = useAuth();
 
   useEffect(() => {
     fetchUsers();
   }, []);
+
+  useEffect(() => {
+    const fetchPatients = async () => {
+      try {
+        const response = await fetch('/api/pacientes', {
+          headers: { 'Authorization': `Bearer ${token}` }
+        });
+        if (response.ok) {
+          const data = await response.json();
+          setPatientOptions(data.map(p => ({
+            id: p.id,
+            name: p.Usuario?.nombreCompleto || 'Paciente sin nombre',
+          })));
+        }
+      } catch (error) {
+        console.error('Error al cargar pacientes para asignación:', error);
+      }
+    };
+
+    fetchPatients();
+  }, [token]);
 
   const fetchUsers = async () => {
     try {
@@ -145,6 +168,10 @@ export default function UserManagement() {
 
   const handleCreateSave = async (e) => {
     e.preventDefault();
+    if (createData.tipo_usuario === 'familiar' && !createData.paciente_asignado_id) {
+      Swal.fire('Error', 'Debes asignar un paciente al familiar.', 'error');
+      return;
+    }
     try {
       const response = await fetch('/api/usuarios', {
         method: 'POST',
@@ -166,6 +193,25 @@ export default function UserManagement() {
       });
       if (response.ok) {
         const newUser = await response.json();
+        if (createData.tipo_usuario === 'familiar') {
+          const assignResponse = await fetch('/api/familiares/asignar', {
+            method: 'POST',
+            headers: {
+              'Authorization': `Bearer ${token}`,
+              'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({
+              familiar_usuario_id: newUser.id,
+              paciente_id: createData.paciente_asignado_id,
+            })
+          });
+
+          if (!assignResponse.ok) {
+            const assignError = await assignResponse.json().catch(() => ({}));
+            throw new Error(assignError.error || 'No se pudo asignar el paciente al familiar');
+          }
+        }
+
         const createdUser = {
           ...newUser,
           nombreCompleto: newUser.nombre || createData.nombreCompleto,
@@ -173,7 +219,7 @@ export default function UserManagement() {
         };
         setUserList([...userList, createdUser]);
         setShowCreate(false);
-        setCreateData({ username: '', nombreCompleto: '', email: '', password: '', tipo_usuario: 'paciente', estado: 'activo', edad: '', telefono: '', fecha_nacimiento: '' });
+        setCreateData({ username: '', nombreCompleto: '', email: '', password: '', tipo_usuario: 'paciente', estado: 'activo', edad: '', telefono: '', fecha_nacimiento: '', paciente_asignado_id: '' });
         Swal.fire('Creado', 'El usuario ha sido creado.', 'success');
       } else {
         const error = await response.json();
@@ -231,7 +277,7 @@ export default function UserManagement() {
                       <div className="font-semibold text-gray-800">{user.nombreCompleto}</div>
                     </td>
                     <td className="px-4 py-4 text-gray-700">
-                      {user.tipo_usuario === 'paciente' ? 'Paciente' : user.tipo_usuario === 'healthcare' ? 'Doctor' : 'Admin'}
+                      {user.tipo_usuario === 'paciente' ? 'Paciente' : user.tipo_usuario === 'healthcare' ? 'Doctor' : user.tipo_usuario === 'familiar' ? 'Familiar' : 'Admin'}
                     </td>
                     <td className="px-4 py-4 text-gray-700">{user.email}</td>
                     <td className="px-4 py-4 text-gray-700">
@@ -265,6 +311,7 @@ export default function UserManagement() {
                 <select name="tipo_usuario" value={editData.tipo_usuario || 'paciente'} onChange={handleEditChange} className="w-full px-4 py-2 border rounded">
                   <option value="paciente">Paciente</option>
                   <option value="healthcare">Doctor</option>
+                  <option value="familiar">Familiar</option>
                   <option value="admin">Admin</option>
                 </select>
                 <input name="edad" type="number" value={editData.edad || ''} onChange={handleEditChange} placeholder="Edad" className="w-full px-4 py-2 border rounded" />
@@ -295,8 +342,23 @@ export default function UserManagement() {
                 <select name="tipo_usuario" value={createData.tipo_usuario} onChange={handleCreateChange} className="w-full px-4 py-2 border rounded">
                   <option value="paciente">Paciente</option>
                   <option value="healthcare">Doctor</option>
+                  <option value="familiar">Familiar</option>
                   <option value="admin">Admin</option>
                 </select>
+                {createData.tipo_usuario === 'familiar' && (
+                  <select
+                    name="paciente_asignado_id"
+                    value={createData.paciente_asignado_id}
+                    onChange={handleCreateChange}
+                    className="w-full px-4 py-2 border rounded"
+                    required={createData.tipo_usuario === 'familiar'}
+                  >
+                    <option value="">Seleccionar paciente asignado</option>
+                    {patientOptions.map(patient => (
+                      <option key={patient.id} value={patient.id}>{patient.name}</option>
+                    ))}
+                  </select>
+                )}
                 <input name="edad" type="number" value={createData.edad} onChange={handleCreateChange} placeholder="Edad" className="w-full px-4 py-2 border rounded" />
                 <input name="telefono" type="text" value={createData.telefono} onChange={handleCreateChange} placeholder="Teléfono" className="w-full px-4 py-2 border rounded" />
                 <input name="fecha_nacimiento" type="date" value={createData.fecha_nacimiento} onChange={handleCreateChange} className="w-full px-4 py-2 border rounded" />

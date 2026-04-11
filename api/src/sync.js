@@ -21,6 +21,7 @@ const Usuario = require('./models/Usuario');
 const Paciente = require('./models/Paciente');
 const Profesional = require('./models/Profesional');
 const Asignacion = require('./models/Asignacion');
+const AsignacionFamiliar = require('./models/AsignacionFamiliar');
 const Actividad = require('./models/Actividad');
 const Calificacion = require('./models/Calificacion');
 const Medicamento = require('./models/Medicamento');

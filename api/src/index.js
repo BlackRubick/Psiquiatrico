@@ -17,6 +17,7 @@ app.use('/api/calificaciones', require('./routes/calificaciones'));
 app.use('/api/medicamentos', require('./routes/medicamentos'));
 app.use('/api/emociones', require('./routes/emociones'));
 app.use('/api/emergencias', require('./routes/emergencias'));
+app.use('/api/familiares', require('./routes/familiares'));
 app.use('/api/dashboards', require('./routes/dashboards'));
 app.use('/api/medicacion-tomada', require('./routes/medicacion-tomada'));
 app.use('/api/actividades-calma', require('./routes/actividades-calma'));

@@ -9,7 +9,7 @@ const Emergencia = sequelize.define('Emergencia', {
   profesional_id: { type: DataTypes.INTEGER, allowNull: true },
   tipo_emergencia: { type: DataTypes.STRING(100) },
   descripcion: { type: DataTypes.TEXT },
-  email_enviado_a: { type: DataTypes.STRING(100) },
+  email_enviado_a: { type: DataTypes.STRING(255) },
   telefonico_enviado_a: { type: DataTypes.STRING(20) },
   estado: { type: DataTypes.ENUM('pendiente', 'en_proceso', 'resuelta'), defaultValue: 'pendiente' },
   actividades_calmantes_ofrecidas: { type: DataTypes.INTEGER },

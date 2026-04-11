@@ -4,6 +4,7 @@ function normalizeRole(role) {
   const value = String(role || '').toLowerCase();
   if (value === 'patient') return 'paciente';
   if (value === 'doctor') return 'healthcare';
+  if (value === 'family') return 'familiar';
   return value;
 }
 
