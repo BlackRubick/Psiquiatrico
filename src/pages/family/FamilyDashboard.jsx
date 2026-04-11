@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../../contexts/AuthContext';
 import { useTheme } from '../../contexts/ThemeContext';
-import { ArrowLeft, Moon, Sun, LogOut, HeartPulse, Users, FileText, BellRing, ShieldAlert, CalendarDays } from 'lucide-react';
+import { ArrowLeft, Moon, Sun, LogOut, HeartPulse, Users, FileText, BellRing, ShieldAlert } from 'lucide-react';
 import Logo from '../../components/common/Logo';
 
 const FamilyDashboard = () => {
@@ -43,14 +43,29 @@ const FamilyDashboard = () => {
   const summary = dashboard?.summary || {};
   const emotionSummary = dashboard?.emotionSummary || {};
   const recentEmergencies = dashboard?.recent?.emergencies || [];
+  const emotionLabels = {
+    alegria: 'Alegría',
+    joy: 'Alegría',
+    tristeza: 'Tristeza',
+    sadness: 'Tristeza',
+    enojo: 'Enojo',
+    anger: 'Enojo',
+    miedo: 'Miedo',
+    fear: 'Miedo',
+    ansiedad: 'Ansiedad',
+    anxiety: 'Ansiedad',
+    calma: 'Calma',
+    calm: 'Calma',
+    estres: 'Estrés',
+    estrés: 'Estrés',
+    stress: 'Estrés',
+    frustracion: 'Frustración',
+    frustración: 'Frustración',
+    frustration: 'Frustración',
+    culpa: 'Culpa',
+    guilt: 'Culpa',
+  };
   const supportChain = [
-    {
-      title: 'Médico',
-      value: professionalUser?.nombreCompleto || 'Sin asignar',
-      detail: professionalUser?.email || 'Pendiente de asignación',
-      icon: HeartPulse,
-      color: 'bg-red-500',
-    },
     {
       title: 'Familiar',
       value: user?.nombreCompleto || 'Familiar',
@@ -146,7 +161,7 @@ const FamilyDashboard = () => {
           </div>
         ) : (
           <>
-            <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-6">
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
               {supportChain.map((item) => (
                 <div key={item.title} className={`rounded-3xl p-5 shadow-xl ${isDark ? 'bg-gray-800 text-white' : 'bg-white text-gray-800'}`}>
                   <div className={`w-14 h-14 rounded-2xl ${item.color} text-white flex items-center justify-center mb-4`}>
@@ -175,11 +190,6 @@ const FamilyDashboard = () => {
                 <p className="text-sm text-gray-500">Registros de emociones</p>
                 <p className="text-3xl font-bold">{summary.emotionsCount || 0}</p>
               </div>
-              <div className={`rounded-3xl p-6 shadow-xl ${isDark ? 'bg-gray-800 text-white' : 'bg-white text-gray-800'}`}>
-                <CalendarDays className="text-green-500 mb-3" size={28} />
-                <p className="text-sm text-gray-500">Próximas citas</p>
-                <p className="text-3xl font-bold">{summary.upcomingAppointments || 0}</p>
-              </div>
             </div>
 
             <div className="grid grid-cols-1 xl:grid-cols-2 gap-6">
@@ -207,12 +217,17 @@ const FamilyDashboard = () => {
                 <div className="space-y-3">
                   {Object.keys(emotionSummary).length === 0 ? (
                     <p className="text-sm text-gray-500">Sin registros este mes.</p>
-                  ) : Object.entries(emotionSummary).map(([emotion, count]) => (
-                    <div key={emotion} className="flex items-center justify-between bg-gray-50 dark:bg-gray-700 rounded-xl px-4 py-3">
-                      <span className="font-medium">{emotion}</span>
-                      <span className="font-bold text-primary">{count}</span>
-                    </div>
-                  ))}
+                  ) : Object.entries(emotionSummary).map(([emotion, count]) => {
+                    const normalizedEmotion = String(emotion).toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '');
+                    const label = emotionLabels[normalizedEmotion] || emotion;
+
+                    return (
+                      <div key={emotion} className="flex items-center justify-between bg-gray-50 dark:bg-gray-700 rounded-xl px-4 py-3">
+                        <span className="font-medium">{label}</span>
+                        <span className="font-bold text-primary">{count}</span>
+                      </div>
+                    );
+                  })}
                 </div>
 
                 <div className="mt-6">
