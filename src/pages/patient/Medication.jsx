@@ -1,7 +1,8 @@
 import { useState } from 'react';
 import { useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { ArrowLeft, Plus, Trash2, Check } from 'lucide-react';
+import { ArrowLeft, Plus, Trash2, Check, Save } from 'lucide-react';
+import Swal from 'sweetalert2';
 import Logo from '../../components/common/Logo';
 
 const Medication = () => {
@@ -364,6 +365,116 @@ const Medication = () => {
     });
   };
 
+  const handleSaveAndResetWeekly = async () => {
+    try {
+      // Calcular el porcentaje de cumplimiento
+      let totalTomas = 0;
+      let tomasTomadas = 0;
+      
+      medications.forEach(med => {
+        dayKeys.forEach(day => {
+          times.forEach(time => {
+            if (med.schedules?.[time.key]) {
+              totalTomas++;
+              if (med.taken?.[day]?.[time.key]) {
+                tomasTomadas++;
+              }
+            }
+          });
+        });
+      });
+
+      const porcentajeComplimiento = totalTomas > 0 ? Math.round((tomasTomadas / totalTomas) * 100) : 0;
+
+      // Mostrar confirmación con estadísticas
+      const result = await Swal.fire({
+        title: '¿Guardar Semana?',
+        html: `<div style="text-align: left;">
+          <p><strong>Resumen de la Semana:</strong></p>
+          <p>Tomas registradas: <strong>${tomasTomadas}/${totalTomas}</strong></p>
+          <p>Cumplimiento: <strong style="color: ${porcentajeComplimiento >= 75 ? '#22C55E' : porcentajeComplimiento >= 50 ? '#F59E0B' : '#EF4444'}">${porcentajeComplimiento}%</strong></p>
+          <p style="margin-top: 12px; font-size: 0.9em;">Se guardará esta información y se reiniciará el calendario.</p>
+        </div>`,
+        icon: 'info',
+        showCancelButton: true,
+        confirmButtonText: 'Guardar y Reiniciar',
+        cancelButtonText: 'Cancelar',
+        confirmButtonColor: '#22C55E',
+        cancelButtonColor: '#6B7280',
+      });
+
+      if (!result.isConfirmed) return;
+
+      // Guardar todas las tomas de la semana
+      const allTaken = [];
+      medications.forEach(med => {
+        dayKeys.forEach(day => {
+          times.forEach(time => {
+            if (med.taken?.[day]?.[time.key]) {
+              allTaken.push({
+                medicamento_id: med.id,
+                paciente_id: pacienteId,
+                dia_semana: day,
+                hora: time.key,
+                tomado: true,
+                fecha: new Date().toISOString().slice(0, 10)
+              });
+            }
+          });
+        });
+      });
+
+      // Guardar en la base de datos
+      if (allTaken.length > 0) {
+        await Promise.all(
+          allTaken.map(taken =>
+            fetch('/api/medicacion-tomada', {
+              method: 'POST',
+              headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${token}`
+              },
+              body: JSON.stringify(taken)
+            })
+          )
+        );
+      }
+
+      // Reiniciar el ciclo - limpiar tomas de la semana
+      const resetMedications = medications.map(med => ({
+        ...med,
+        taken: {}
+      }));
+      setMedications(resetMedications);
+      
+      setError(`¡Excelente! Semana guardada con ${porcentajeComplimiento}% de cumplimiento. Ciclo reiniciado.`);
+
+      // Mostrar confirmación final
+      await Swal.fire({
+        title: '¡Éxito!',
+        html: `<div style="text-align: center;">
+          <p style="font-size: 2em; color: #22C55E; margin: 0;">✓</p>
+          <p><strong>Semana guardada correctamente</strong></p>
+          <p>Cumplimiento: <strong>${porcentajeComplimiento}%</strong></p>
+          <p style="font-size: 0.9em; margin-top: 12px;">El calendario se ha reiniciado para la próxima semana.</p>
+        </div>`,
+        icon: 'success',
+        confirmButtonText: 'Aceptar',
+        confirmButtonColor: '#4A90E2',
+      });
+
+    } catch (err) {
+      console.error('Error al guardar semana:', err);
+      Swal.fire({
+        title: 'Error',
+        text: 'No se pudo guardar la semana de medicación. Por favor, intenta de nuevo.',
+        icon: 'error',
+        confirmButtonText: 'Aceptar',
+        confirmButtonColor: '#FF6B6B',
+      });
+    }
+  };
+
   if (!isSetup) {
     return (
       <div className="min-h-screen bg-gradient-to-br from-gray-600 via-gray-700 to-gray-800 p-4">
@@ -537,6 +648,23 @@ const Medication = () => {
                 ))}
               </tbody>
             </table>
+          </div>
+
+          <div className="mt-6 flex gap-4">
+            <button
+              onClick={() => setIsSetup(false)}
+              className="flex-1 bg-primary text-white px-4 py-3 rounded-lg hover:bg-primary-dark transition-colors font-semibold flex items-center justify-center gap-2"
+            >
+              <Plus size={20} />
+              Modificar Medicamentos
+            </button>
+            <button
+              onClick={handleSaveAndResetWeekly}
+              className="flex-1 bg-green-600 text-white px-4 py-3 rounded-lg hover:bg-green-700 transition-colors font-semibold flex items-center justify-center gap-2"
+            >
+              <Save size={20} />
+              Guardar Semana y Reiniciar
+            </button>
           </div>
         </div>
       </div>
