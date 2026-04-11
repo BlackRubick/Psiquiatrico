@@ -5,12 +5,6 @@ import { useTheme } from '../../contexts/ThemeContext';
 import Logo from '../../components/common/Logo';
 import { Moon, Sun } from 'lucide-react';
 
-const testUsers = [
-  { usernameOrEmail: 'admin', password: 'admin123', userType: 'admin' },
-  { usernameOrEmail: 'doctor', password: 'doctor123', userType: 'healthcare' },
-  { usernameOrEmail: 'paciente', password: 'paciente123', userType: 'patient' },
-];
-
 const Landing = () => {
   const navigate = useNavigate();
   const location = useLocation();
@@ -49,12 +43,28 @@ const Landing = () => {
     }
   }, [userType, user, location.pathname, hasNavigated, navigate]);
 
-  return ({`min-h-screen flex items-center justify-center p-4 transition-colors duration-300 ${
+  return (
+    <div className={`min-h-screen flex items-center justify-center p-4 transition-colors duration-300 ${
       isDark 
         ? 'bg-gradient-to-br from-gray-600 via-gray-700 to-gray-800' 
         : 'bg-gradient-to-br from-blue-50 via-white to-blue-50'
     }`}>
-      <button{`text-5xl font-bold mb-2 ${isDark ? 'text-white' : 'text-gray-800'}`}>
+      <button
+        onClick={toggleTheme}
+        className={`absolute top-4 right-4 p-2 rounded-lg transition-all duration-300 ${
+          isDark 
+            ? 'bg-gray-700 hover:bg-gray-600 text-yellow-400' 
+            : 'bg-gray-200 hover:bg-gray-300 text-gray-600'
+        }`}
+        title={isDark ? 'Cambiar a modo claro' : 'Cambiar a modo oscuro'}
+      >
+        {isDark ? <Sun size={24} /> : <Moon size={24} />}
+      </button>
+      
+      <div className="max-w-md w-full">
+        <div className="text-center mb-8">
+          <Logo className="w-24 h-24 mx-auto mb-4" />
+          <h1 className={`text-5xl font-bold mb-2 ${isDark ? 'text-white' : 'text-gray-800'}`}>
             BIO<span className="text-primary">PSYCHE</span>
           </h1>
           <div className="relative">
@@ -95,22 +105,6 @@ const Landing = () => {
                   ? 'border-gray-300 focus:border-primary bg-gray-50'
                   : 'border-gray-300 focus:border-primary bg-white'
               }`}
-          </h2>
-          <div className="space-y-3">
-            <input
-              type="text"
-              placeholder="Usuario o correo electrónico"
-              value={usernameOrEmail}
-              onChange={e => setUsernameOrEmail(e.target.value)}
-              className="w-full px-4 py-3 border-2 border-gray-300 rounded-lg focus:outline-none focus:border-primary transition-colors"
-              required
-            />
-            <input
-              type="password"
-              placeholder="Contraseña"
-              value={password}
-              onChange={e => setPassword(e.target.value)}
-              className="w-full px-4 py-3 border-2 border-gray-300 rounded-lg focus:outline-none focus:border-primary transition-colors"
               required
             />
             <button type="submit" className="w-full bg-primary text-white py-3 rounded-lg hover:bg-primary-dark transition-colors font-semibold">

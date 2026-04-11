@@ -61,7 +61,8 @@ const PatientDashboard = () => {
     },
   ];
 
-  return ({`min-h-screen p-4 transition-colors duration-300 ${
+  return (
+    <div className={`min-h-screen p-4 transition-colors duration-300 ${
       isDark 
         ? 'bg-gradient-to-br from-gray-600 via-gray-700 to-gray-800' 
         : 'bg-gradient-to-br from-blue-50 via-white to-blue-50'
@@ -143,7 +144,6 @@ const PatientDashboard = () => {
           }`}
         >
           <AlertCircle size={48} />
-          <span
           <span className="text-2xl font-bold">
             ¡¡BOTÓN DE EMERGENCIA!!
           </span>

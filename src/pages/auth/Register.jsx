@@ -38,7 +38,8 @@ const Register = () => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
   };
 
-  return ({`min-h-screen flex items-center justify-center p-4 transition-colors duration-300 ${
+  return (
+    <div className={`min-h-screen flex items-center justify-center p-4 transition-colors duration-300 ${
       isDark 
         ? 'bg-gradient-to-br from-gray-600 via-gray-700 to-gray-800' 
         : 'bg-gradient-to-br from-blue-50 via-white to-blue-50'
