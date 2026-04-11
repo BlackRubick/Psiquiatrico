@@ -194,12 +194,18 @@ const Medication = () => {
   const [isSetup, setIsSetup] = useState(false);
   const [medications, setMedications] = useState([]);
   const [medicationTaken, setMedicationTaken] = useState([]);
-  const [weekStartDate, setWeekStartDate] = useState(() => {
-    const saved = localStorage.getItem(`medication_week_start_${pacienteId}`);
-    return saved ? new Date(saved) : new Date();
-  });
   const token = localStorage.getItem('biopsyche_token');
   const pacienteId = localStorage.getItem('biopsyche_paciente_id');
+  const [weekStartDate, setWeekStartDate] = useState(new Date());
+
+  useEffect(() => {
+    if (!pacienteId) return;
+
+    const saved = localStorage.getItem(`medication_week_start_${pacienteId}`);
+    if (saved) {
+      setWeekStartDate(new Date(saved));
+    }
+  }, [pacienteId]);
 
   useEffect(() => {
     const fetchData = async () => {
