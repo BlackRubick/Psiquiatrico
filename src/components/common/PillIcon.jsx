@@ -3,7 +3,7 @@ const PillIcon = ({ size = 64, className = "" }) => {
     <svg
       width={size}
       height={size}
-      viewBox="0 0 100 60"
+      viewBox="0 0 100 100"
       fill="none"
       xmlns="http://www.w3.org/2000/svg"
       className={className}
@@ -17,40 +17,40 @@ const PillIcon = ({ size = 64, className = "" }) => {
 
       {/* Lado izquierdo rojo - semi-círculo */}
       <path
-        d="M 30 10 Q 10 10 10 30 Q 10 50 30 50 L 30 10"
+        d="M 50 20 Q 25 20 25 50 Q 25 80 50 80 L 50 20"
         fill="#FF6B6B"
         filter="url(#shadow)"
       />
 
       {/* Lado derecho amarillo - semi-círculo */}
       <path
-        d="M 30 10 Q 50 10 50 30 Q 50 50 30 50 L 30 10"
+        d="M 50 20 Q 75 20 75 50 Q 75 80 50 80 L 50 20"
         fill="#FFD966"
         filter="url(#shadow)"
       />
 
       {/* Borde rojo para el lado izquierdo */}
       <path
-        d="M 30 10 Q 10 10 10 30 Q 10 50 30 50"
+        d="M 50 20 Q 25 20 25 50 Q 25 80 50 80"
         stroke="#D64545"
-        strokeWidth="1.5"
+        strokeWidth="2"
         fill="none"
       />
 
       {/* Borde amarillo para el lado derecho */}
       <path
-        d="M 30 10 Q 50 10 50 30 Q 50 50 30 50"
+        d="M 50 20 Q 75 20 75 50 Q 75 80 50 80"
         stroke="#E6B800"
-        strokeWidth="1.5"
+        strokeWidth="2"
         fill="none"
       />
 
       {/* Línea divisoria con degradado */}
-      <line x1="30" y1="10" x2="30" y2="50" stroke="#2C3E50" strokeWidth="1.5" />
+      <line x1="50" y1="20" x2="50" y2="80" stroke="#2C3E50" strokeWidth="2" />
 
       {/* Brillo/highlight para dar efecto 3D */}
-      <ellipse cx="15" cy="20" rx="4" ry="6" fill="white" opacity="0.4" />
-      <ellipse cx="45" cy="20" rx="4" ry="6" fill="white" opacity="0.3" />
+      <ellipse cx="32" cy="32" rx="6" ry="8" fill="white" opacity="0.4" />
+      <ellipse cx="68" cy="32" rx="6" ry="8" fill="white" opacity="0.3" />
     </svg>
   );
 };
