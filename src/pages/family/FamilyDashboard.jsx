@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../../contexts/AuthContext';
 import { useTheme } from '../../contexts/ThemeContext';
-import { ArrowLeft, Moon, Sun, LogOut, HeartPulse, Users, CalendarDays, FileText, BellRing, ShieldAlert } from 'lucide-react';
+import { ArrowLeft, Moon, Sun, LogOut, HeartPulse, Users, FileText, BellRing, ShieldAlert } from 'lucide-react';
 import Logo from '../../components/common/Logo';
 
 const FamilyDashboard = () => {
@@ -43,11 +43,9 @@ const FamilyDashboard = () => {
   const summary = dashboard?.summary || {};
   const emotionSummary = dashboard?.emotionSummary || {};
   const recentEmergencies = dashboard?.recent?.emergencies || [];
-  const upcomingAppointments = dashboard?.recent?.appointments || [];
-
   const supportChain = [
     {
-      title: 'Médico',
+      title: 'Médico asignado',
       value: professionalUser?.nombreCompleto || 'Sin asignar',
       detail: professionalUser?.email || 'Pendiente de asignación',
       icon: HeartPulse,
@@ -202,6 +200,16 @@ const FamilyDashboard = () => {
                 >
                   Ver información TLP
                 </button>
+
+                <div className="mt-6 rounded-2xl border border-red-200 bg-red-50 p-4">
+                  <h4 className="font-bold text-red-700 mb-2">Médico asignado</h4>
+                  <p className="text-sm text-gray-700">
+                    {professionalUser?.nombreCompleto || 'Sin asignar'}
+                  </p>
+                  <p className="text-sm text-gray-500">
+                    {professionalUser?.email || 'Pendiente de asignación'}
+                  </p>
+                </div>
               </div>
 
               <div className={`rounded-3xl p-6 shadow-xl ${isDark ? 'bg-gray-800 text-white' : 'bg-white text-gray-800'}`}>
@@ -231,19 +239,6 @@ const FamilyDashboard = () => {
                   </div>
                 </div>
 
-                <div className="mt-6">
-                  <h4 className="font-bold mb-3">Próximas citas</h4>
-                  <div className="space-y-2 max-h-48 overflow-y-auto pr-1">
-                    {upcomingAppointments.length === 0 ? (
-                      <p className="text-sm text-gray-500">No hay citas programadas.</p>
-                    ) : upcomingAppointments.map((item) => (
-                      <div key={item.id} className="bg-blue-50 border border-blue-200 rounded-xl p-3 text-sm">
-                        <p className="font-semibold text-blue-700">{item.motivo || 'Cita'}</p>
-                        <p className="text-gray-600">{item.fecha ? new Date(item.fecha).toLocaleDateString('es-ES') : 'N/D'} {item.hora || ''}</p>
-                      </div>
-                    ))}
-                  </div>
-                </div>
               </div>
             </div>
           </>
