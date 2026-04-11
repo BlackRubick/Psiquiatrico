@@ -45,7 +45,7 @@ const FamilyDashboard = () => {
   const recentEmergencies = dashboard?.recent?.emergencies || [];
   const supportChain = [
     {
-      title: 'Médico asignado',
+      title: 'Médico',
       value: professionalUser?.nombreCompleto || 'Sin asignar',
       detail: professionalUser?.email || 'Pendiente de asignación',
       icon: HeartPulse,
@@ -200,16 +200,6 @@ const FamilyDashboard = () => {
                 >
                   Ver información TLP
                 </button>
-
-                <div className="mt-6 rounded-2xl border border-red-200 bg-red-50 p-4">
-                  <h4 className="font-bold text-red-700 mb-2">Médico asignado</h4>
-                  <p className="text-sm text-gray-700">
-                    {professionalUser?.nombreCompleto || 'Sin asignar'}
-                  </p>
-                  <p className="text-sm text-gray-500">
-                    {professionalUser?.email || 'Pendiente de asignación'}
-                  </p>
-                </div>
               </div>
 
               <div className={`rounded-3xl p-6 shadow-xl ${isDark ? 'bg-gray-800 text-white' : 'bg-white text-gray-800'}`}>
