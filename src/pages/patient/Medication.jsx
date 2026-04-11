@@ -272,6 +272,8 @@ const Medication = () => {
 
     checkAndResetWeek();
   }, [medications, weekStartDate, pacienteId, token]);
+
+  const [newMed, setNewMed] = useState({ name: '', morning: false, afternoon: false, night: false });
   const [selectedClave, setSelectedClave] = useState('');
 
   const days = ['Lunes', 'Martes', 'Miércoles', 'Jueves', 'Viernes', 'Sábado', 'Domingo'];
