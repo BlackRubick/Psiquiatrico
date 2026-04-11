@@ -1,8 +1,9 @@
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../../contexts/AuthContext';
 import { useTheme } from '../../contexts/ThemeContext';
-import { Activity, Pill, User, Heart, AlertCircle, BookOpen, LogOut, Calendar, Scale, Moon, Sun } from 'lucide-react';
+import { Activity, User, Heart, AlertCircle, BookOpen, LogOut, Calendar, Scale, Moon, Sun } from 'lucide-react';
 import Logo from '../../components/common/Logo';
+import PillIcon from '../../components/common/PillIcon';
 
 const PatientDashboard = () => {
   const navigate = useNavigate();
@@ -28,14 +29,14 @@ const PatientDashboard = () => {
       id: 'profile', 
       title: 'PERFIL', 
       icon: User, 
-      color: 'bg-accent-gray',
+      color: 'bg-accent-green',
       path: '/patient/profile'
     },
     { 
       id: 'medication', 
       title: 'MEDICACIÓN', 
       icon: Pill, 
-      color: 'bg-accent-green',
+      color: 'bg-accent-gray',
       path: '/patient/medication'
     },
     { 
@@ -127,7 +128,11 @@ const PatientDashboard = () => {
               onClick={() => navigate(item.path)}
               className={`${item.color} rounded-3xl p-6 shadow-lg hover:scale-105 transition-all duration-200 flex flex-col items-center justify-center min-h-[160px] text-gray-800 font-bold`}
             >
-              <item.icon size={48} className="mb-3" />
+              {item.id === 'medication' ? (
+                <PillIcon size={48} className="mb-3" />
+              ) : (
+                <item.icon size={48} className="mb-3" />
+              )}
               <span className="text-sm text-center whitespace-pre-line">
                 {item.title}
               </span>
