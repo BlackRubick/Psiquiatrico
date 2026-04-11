@@ -1,21 +1,56 @@
-const PillIcon = ({ size = 48, className = "" }) => {
+const PillIcon = ({ size = 64, className = "" }) => {
   return (
     <svg
       width={size}
       height={size}
-      viewBox="0 0 48 48"
+      viewBox="0 0 100 100"
       fill="none"
       xmlns="http://www.w3.org/2000/svg"
       className={className}
     >
-      {/* Lado izquierdo rojo */}
-      <ellipse cx="14" cy="24" rx="10" ry="14" fill="#FF6B6B" stroke="#2C3E50" strokeWidth="2" />
-      
-      {/* Lado derecho amarillo */}
-      <ellipse cx="34" cy="24" rx="10" ry="14" fill="#FFD966" stroke="#2C3E50" strokeWidth="2" />
-      
-      {/* Línea divisoria */}
-      <line x1="24" y1="10" x2="24" y2="38" stroke="#2C3E50" strokeWidth="2" />
+      {/* Sombra */}
+      <defs>
+        <filter id="shadow" x="-50%" y="-50%" width="200%" height="200%">
+          <feDropShadow dx="0" dy="2" stdDeviation="3" floodOpacity="0.2" />
+        </filter>
+      </defs>
+
+      {/* Lado izquierdo rojo - semi-círculo */}
+      <path
+        d="M 50 20 Q 25 20 25 50 Q 25 80 50 80 L 50 20"
+        fill="#FF6B6B"
+        filter="url(#shadow)"
+      />
+
+      {/* Lado derecho amarillo - semi-círculo */}
+      <path
+        d="M 50 20 Q 75 20 75 50 Q 75 80 50 80 L 50 20"
+        fill="#FFD966"
+        filter="url(#shadow)"
+      />
+
+      {/* Borde rojo para el lado izquierdo */}
+      <path
+        d="M 50 20 Q 25 20 25 50 Q 25 80 50 80"
+        stroke="#D64545"
+        strokeWidth="2"
+        fill="none"
+      />
+
+      {/* Borde amarillo para el lado derecho */}
+      <path
+        d="M 50 20 Q 75 20 75 50 Q 75 80 50 80"
+        stroke="#E6B800"
+        strokeWidth="2"
+        fill="none"
+      />
+
+      {/* Línea divisoria con degradado */}
+      <line x1="50" y1="20" x2="50" y2="80" stroke="#2C3E50" strokeWidth="2" />
+
+      {/* Brillo/highlight para dar efecto 3D */}
+      <ellipse cx="32" cy="32" rx="6" ry="8" fill="white" opacity="0.4" />
+      <ellipse cx="68" cy="32" rx="6" ry="8" fill="white" opacity="0.3" />
     </svg>
   );
 };
