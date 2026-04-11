@@ -157,20 +157,28 @@ exports.assignPatient = async (req, res) => {
       return res.status(404).json({ error: 'Paciente no encontrado' });
     }
 
+    const existingByPatient = await AsignacionFamiliar.findOne({ where: { paciente_id } });
+    if (existingByPatient) {
+      const sameFamily = existingByPatient.familiar_usuario_id === familiar_usuario_id;
+      if (sameFamily) {
+        return res.json(existingByPatient);
+      }
+      return res.status(409).json({ error: 'Ese paciente ya tiene un familiar asignado' });
+    }
+
     const existingByFamily = await AsignacionFamiliar.findOne({ where: { familiar_usuario_id } });
     if (existingByFamily) {
       await existingByFamily.update({ paciente_id });
       return res.json(existingByFamily);
     }
 
-    const existingByPatient = await AsignacionFamiliar.findOne({ where: { paciente_id } });
-    if (existingByPatient) {
-      return res.status(409).json({ error: 'Ese paciente ya tiene un familiar asignado' });
-    }
-
     const assignment = await AsignacionFamiliar.create({ familiar_usuario_id, paciente_id });
     res.status(201).json(assignment);
   } catch (err) {
+    if (err.name === 'SequelizeUniqueConstraintError') {
+      return res.status(409).json({ error: 'Ya existe una asignación para ese familiar o paciente' });
+    }
+    console.error('Error al asignar paciente a familiar:', err);
     res.status(500).json({ error: 'Error al asignar paciente a familiar' });
   }
 };
