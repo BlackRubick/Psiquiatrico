@@ -129,9 +129,9 @@ const PatientDashboard = () => {
               className={`${item.color} rounded-3xl p-6 shadow-lg hover:scale-105 transition-all duration-200 flex flex-col items-center justify-center min-h-[160px] text-gray-800 font-bold`}
             >
               {item.id === 'medication' ? (
-                <PillIcon size={48} className="mb-3" />
+                <PillIcon size={64} className="mb-3" />
               ) : (
-                <item.icon size={48} className="mb-3" />
+                <item.icon size={64} className="mb-3" />
               )}
               <span className="text-sm text-center whitespace-pre-line">
                 {item.title}
