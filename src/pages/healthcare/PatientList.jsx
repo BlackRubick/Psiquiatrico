@@ -29,6 +29,7 @@ const PatientList = () => {
   const [editData, setEditData] = useState({});
   const [familyUsers, setFamilyUsers] = useState([]);
   const [assignData, setAssignData] = useState({ patientId: '', familiarUserId: '' });
+  const [newFamilyData, setNewFamilyData] = useState({ name: '', email: '', phone: '', password: '' });
   const [patients, setPatients] = useState([]);
   const token = localStorage.getItem('biopsyche_token');
 
@@ -92,6 +93,11 @@ const PatientList = () => {
   const handleEditChange = (e) => {
     const { name, value } = e.target;
     setEditData(prev => ({ ...prev, [name]: value }));
+  };
+
+  const handleNewFamilyChange = (e) => {
+    const { name, value } = e.target;
+    setNewFamilyData(prev => ({ ...prev, [name]: value }));
   };
 
   const calculateAge = (birthdate) => {
@@ -336,6 +342,38 @@ const PatientList = () => {
   const handleAssignFamily = async (e) => {
     e.preventDefault();
     try {
+      let familiarUserId = assignData.familiarUserId;
+
+      if (!familiarUserId) {
+        if (!newFamilyData.name || !newFamilyData.email || !newFamilyData.password) {
+          throw new Error('Selecciona un familiar o llena los datos para crear uno nuevo');
+        }
+
+        const createFamilyResponse = await fetch('/api/usuarios', {
+          method: 'POST',
+          headers: {
+            'Authorization': `Bearer ${token}`,
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify({
+            username: newFamilyData.email.split('@')[0],
+            nombreCompleto: newFamilyData.name,
+            email: newFamilyData.email,
+            password: newFamilyData.password,
+            tipo_usuario: 'familiar',
+            estado: 'activo',
+            telefono: newFamilyData.phone,
+          })
+        });
+
+        const familyCreated = await createFamilyResponse.json().catch(() => ({}));
+        if (!createFamilyResponse.ok) {
+          throw new Error(familyCreated.error || 'No se pudo crear el familiar');
+        }
+
+        familiarUserId = familyCreated.id;
+      }
+
       const response = await fetch('/api/familiares/asignar', {
         method: 'POST',
         headers: {
@@ -344,12 +382,13 @@ const PatientList = () => {
         },
         body: JSON.stringify({
           paciente_id: assignData.patientId,
-          familiar_usuario_id: assignData.familiarUserId,
+          familiar_usuario_id: familiarUserId,
         })
       });
       const data = await response.json().catch(() => ({}));
       if (!response.ok) throw new Error(data.error || 'No se pudo asignar el familiar');
       setShowAssignFamily(false);
+      setNewFamilyData({ name: '', email: '', phone: '', password: '' });
       Swal.fire('Asignado', 'El familiar fue vinculado correctamente al paciente.', 'success');
     } catch (err) {
       Swal.fire('Error', err.message, 'error');
@@ -643,7 +682,7 @@ const PatientList = () => {
         )}
         {showAssignFamily && (
           <div className="fixed inset-0 bg-black bg-opacity-40 flex items-center justify-center z-50">
-            <div className="bg-white rounded-2xl shadow-2xl p-8 w-full max-w-md relative">
+            <div className="bg-white rounded-2xl shadow-2xl p-8 w-full max-w-lg relative max-h-[90vh] overflow-y-auto">
               <button onClick={() => setShowAssignFamily(false)} className="absolute top-4 right-4 text-gray-500 hover:text-red-500">
                 <X size={28} />
               </button>
@@ -653,19 +692,62 @@ const PatientList = () => {
                 <p className="text-gray-600 text-center">Vincula un familiar a este paciente para la red de apoyo.</p>
               </div>
               <form onSubmit={handleAssignFamily} className="space-y-4">
-                <select
-                  value={assignData.familiarUserId}
-                  onChange={(e) => setAssignData(prev => ({ ...prev, familiarUserId: e.target.value }))}
-                  className="w-full px-4 py-3 border-2 border-gray-300 rounded-lg focus:outline-none focus:border-primary"
-                  required
-                >
-                  <option value="">Seleccionar familiar</option>
-                  {familyUsers.map(user => (
-                    <option key={user.id} value={user.id}>{user.nombreCompleto} - {user.email}</option>
-                  ))}
-                </select>
+                <div>
+                  <label className="block text-sm font-semibold text-gray-700 mb-1">Familiar existente</label>
+                  <select
+                    value={assignData.familiarUserId}
+                    onChange={(e) => setAssignData(prev => ({ ...prev, familiarUserId: e.target.value }))}
+                    className="w-full px-4 py-3 border-2 border-gray-300 rounded-lg focus:outline-none focus:border-primary"
+                  >
+                    <option value="">Seleccionar familiar existente</option>
+                    {familyUsers.map(user => (
+                      <option key={user.id} value={user.id}>{user.nombreCompleto} - {user.email}</option>
+                    ))}
+                  </select>
+                  {familyUsers.length === 0 && (
+                    <p className="text-sm text-amber-600 mt-2">
+                      No hay familiares creados todavía. Puedes crearlo aquí mismo.
+                    </p>
+                  )}
+                </div>
+
+                <div className="border-t-2 border-gray-200 pt-4">
+                  <h3 className="text-lg font-bold text-gray-800 mb-3">Crear nuevo familiar</h3>
+                  <div className="space-y-3">
+                    <input
+                      name="name"
+                      value={newFamilyData.name}
+                      onChange={handleNewFamilyChange}
+                      placeholder="Nombre completo"
+                      className="w-full px-4 py-3 border-2 border-gray-300 rounded-lg focus:outline-none focus:border-primary"
+                    />
+                    <input
+                      name="email"
+                      type="email"
+                      value={newFamilyData.email}
+                      onChange={handleNewFamilyChange}
+                      placeholder="Correo electrónico"
+                      className="w-full px-4 py-3 border-2 border-gray-300 rounded-lg focus:outline-none focus:border-primary"
+                    />
+                    <input
+                      name="phone"
+                      value={newFamilyData.phone}
+                      onChange={handleNewFamilyChange}
+                      placeholder="Teléfono"
+                      className="w-full px-4 py-3 border-2 border-gray-300 rounded-lg focus:outline-none focus:border-primary"
+                    />
+                    <input
+                      name="password"
+                      type="password"
+                      value={newFamilyData.password}
+                      onChange={handleNewFamilyChange}
+                      placeholder="Contraseña"
+                      className="w-full px-4 py-3 border-2 border-gray-300 rounded-lg focus:outline-none focus:border-primary"
+                    />
+                  </div>
+                </div>
                 <button type="submit" className="w-full bg-amber-500 text-white px-6 py-3 rounded-lg font-semibold hover:bg-amber-600 transition-colors">
-                  Guardar asignación
+                  Guardar y asignar familiar
                 </button>
               </form>
             </div>
