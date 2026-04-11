@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { ArrowLeft, Smile, Frown, Meh, HeartCrack, Angry, Zap } from 'lucide-react';
+import { ArrowLeft, Smile, Frown, Meh, HeartCrack, Angry, Zap, AlertCircle } from 'lucide-react';
 import Swal from 'sweetalert2';
 import Logo from '../../components/common/Logo';
 import React from 'react';
@@ -32,6 +32,7 @@ const Emotions = () => {
     { id: 'anxious', label: 'Ansioso', icon: Zap, color: 'bg-purple-400' },
     { id: 'neutral', label: 'Neutral', icon: Meh, color: 'bg-gray-400' },
     { id: 'hurt', label: 'Herido', icon: HeartCrack, color: 'bg-pink-400' },
+    { id: 'afraid', label: 'Miedo', icon: AlertCircle, color: 'bg-orange-400' },
   ];
 
   const times = [
