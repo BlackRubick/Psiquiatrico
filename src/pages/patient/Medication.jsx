@@ -194,6 +194,10 @@ const Medication = () => {
   const [isSetup, setIsSetup] = useState(false);
   const [medications, setMedications] = useState([]);
   const [medicationTaken, setMedicationTaken] = useState([]);
+  const [weekStartDate, setWeekStartDate] = useState(() => {
+    const saved = localStorage.getItem(`medication_week_start_${pacienteId}`);
+    return saved ? new Date(saved) : new Date();
+  });
   const token = localStorage.getItem('biopsyche_token');
   const pacienteId = localStorage.getItem('biopsyche_paciente_id');
 
@@ -245,7 +249,23 @@ const Medication = () => {
     };
     if (pacienteId && token) fetchData();
   }, [pacienteId, token]);
-  const [newMed, setNewMed] = useState({ name: '', morning: false, afternoon: false, night: false });
+
+  // Detectar y reiniciar automáticamente después de 7 días
+  useEffect(() => {
+    if (!medications.length) return;
+
+    const checkAndResetWeek = async () => {
+      const now = new Date();
+      const daysSinceStart = Math.floor((now - weekStartDate) / (1000 * 60 * 60 * 24));
+
+      // Si pasaron 7 días, guardar automáticamente y reiniciar
+      if (daysSinceStart >= 7) {
+        await autoSaveAndResetWeekly();
+      }
+    };
+
+    checkAndResetWeek();
+  }, [medications, weekStartDate, pacienteId, token]);
   const [selectedClave, setSelectedClave] = useState('');
 
   const days = ['Lunes', 'Martes', 'Miércoles', 'Jueves', 'Viernes', 'Sábado', 'Domingo'];
@@ -365,6 +385,80 @@ const Medication = () => {
     });
   };
 
+  const autoSaveAndResetWeekly = async () => {
+    try {
+      let totalTomas = 0;
+      let tomasTomadas = 0;
+      
+      medications.forEach(med => {
+        dayKeys.forEach(day => {
+          times.forEach(time => {
+            if (med.schedules?.[time.key]) {
+              totalTomas++;
+              if (med.taken?.[day]?.[time.key]) {
+                tomasTomadas++;
+              }
+            }
+          });
+        });
+      });
+
+      const porcentajeComplimiento = totalTomas > 0 ? Math.round((tomasTomadas / totalTomas) * 100) : 0;
+      const allTaken = [];
+      
+      medications.forEach(med => {
+        dayKeys.forEach(day => {
+          times.forEach(time => {
+            if (med.taken?.[day]?.[time.key]) {
+              allTaken.push({
+                medicamento_id: med.id,
+                paciente_id: pacienteId,
+                dia_semana: day,
+                hora: time.key,
+                tomado: true,
+                fecha: new Date().toISOString().slice(0, 10)
+              });
+            }
+          });
+        });
+      });
+
+      if (allTaken.length > 0) {
+        await Promise.all(
+          allTaken.map(taken =>
+            fetch('/api/medicacion-tomada', {
+              method: 'POST',
+              headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${token}`
+              },
+              body: JSON.stringify(taken)
+            })
+          )
+        );
+      }
+
+      const resetMedications = medications.map(med => ({ ...med, taken: {} }));
+      setMedications(resetMedications);
+      const newStartDate = new Date();
+      setWeekStartDate(newStartDate);
+      localStorage.setItem(`medication_week_start_${pacienteId}`, newStartDate.toISOString());
+      
+      setError(`✓ Semana guardada automáticamente con ${porcentajeComplimiento}% de cumplimiento. ¡Nuevo ciclo iniciado!`);
+      Swal.fire({
+        title: '✓ Ciclo Completado',
+        html: `<div style="text-align: center;"><p><strong>Cumplimiento: ${porcentajeComplimiento}%</strong></p><p style="font-size: 0.9em;">Se guardó automáticamente.</p></div>`,
+        icon: 'success',
+        confirmButtonText: 'Aceptar',
+        confirmButtonColor: '#4A90E2',
+        timer: 5000,
+        timerProgressBar: true,
+      });
+    } catch (err) {
+      console.error('Error:', err);
+    }
+  };
+
   const handleSaveAndResetWeekly = async () => {
     try {
       // Calcular el porcentaje de cumplimiento
@@ -441,14 +535,19 @@ const Medication = () => {
       }
 
       // Reiniciar el ciclo - limpiar tomas de la semana
+
       const resetMedications = medications.map(med => ({
         ...med,
         taken: {}
       }));
       setMedications(resetMedications);
+
+      // Actualizar la fecha de inicio de la semana
+      const newStartDate = new Date();
+      setWeekStartDate(newStartDate);
+      localStorage.setItem(`medication_week_start_${pacienteId}`, newStartDate.toISOString());
       
       setError(`¡Excelente! Semana guardada con ${porcentajeComplimiento}% de cumplimiento. Ciclo reiniciado.`);
-
       // Mostrar confirmación final
       await Swal.fire({
         title: '¡Éxito!',
@@ -598,6 +697,37 @@ const Medication = () => {
         </div>
 
         <div className="bg-white rounded-lg shadow-xl p-6 mb-4">
+            {weekStartDate && (
+              <div className="mb-4 p-4 bg-blue-50 border-2 border-blue-200 rounded-lg">
+                {(() => {
+                  const now = new Date();
+                  const daysSinceStart = Math.floor((now - weekStartDate) / (1000 * 60 * 60 * 24));
+                  const daysRemaining = Math.max(0, 7 - daysSinceStart);
+                  const percentage = Math.round(((daysSinceStart % 7) / 7) * 100);
+                
+                  return (
+                    <div>
+                      <div className="flex justify-between items-center mb-2">
+                        <span className="font-semibold text-gray-700">Progreso de la Semana</span>
+                        <span className="text-sm text-gray-600">{daysRemaining} días restantes</span>
+                      </div>
+                      <div className="w-full bg-gray-200 rounded-full h-2">
+                        <div 
+                          className="bg-blue-600 h-2 rounded-full transition-all duration-300" 
+                          style={{ width: `${percentage}%` }}
+                        ></div>
+                      </div>
+                      <p className="text-xs text-gray-600 mt-2">
+                        {daysRemaining === 0 
+                          ? '✓ ¡Semana completada! Se reiniciará automáticamente pronto.' 
+                          : `Faltan ${daysRemaining} día${daysRemaining !== 1 ? 's' : ''} para el reinicio automático.`}
+                      </p>
+                    </div>
+                  );
+                })()}
+              </div>
+            )}
+
           <button
             onClick={() => setIsSetup(false)}
             className="mb-4 bg-primary text-white px-4 py-2 rounded-lg hover:bg-primary-dark transition-colors font-semibold flex items-center gap-2"
@@ -660,10 +790,10 @@ const Medication = () => {
             </button>
             <button
               onClick={handleSaveAndResetWeekly}
-              className="flex-1 bg-green-600 text-white px-4 py-3 rounded-lg hover:bg-green-700 transition-colors font-semibold flex items-center justify-center gap-2"
+              className="flex-1 bg-amber-500 text-white px-4 py-3 rounded-lg hover:bg-amber-600 transition-colors font-semibold flex items-center justify-center gap-2"
             >
               <Save size={20} />
-              Guardar Semana y Reiniciar
+              Reiniciar Manualmente Ahora
             </button>
           </div>
         </div>
