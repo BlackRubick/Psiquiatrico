@@ -51,7 +51,7 @@ exports.update = async (req, res) => {
     const user = await Usuario.findByPk(req.params.id);
     if (!user) return res.status(404).json({ error: 'Usuario no encontrado' });
 
-    if (req.user?.tipo_usuario === 'healthcare' && !['paciente', 'familiar'].includes(String(user.tipo_usuario).toLowerCase())) {
+      if (req.user?.tipo_usuario === 'healthcare' && user.tipo_usuario !== 'paciente' && user.tipo_usuario !== 'familiar') {
       return res.status(403).json({ error: 'Solo puedes actualizar usuarios tipo paciente o familiar' });
     }
 

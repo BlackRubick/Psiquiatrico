@@ -11,6 +11,7 @@ const PatientList = () => {
   const [showEdit, setShowEdit] = useState(false);
   const [showAssignFamily, setShowAssignFamily] = useState(false);
   const [createData, setCreateData] = useState({ 
+    tipo_usuario: 'paciente',
     name: '', 
     email: '', 
     password: '', 
@@ -22,7 +23,8 @@ const PatientList = () => {
     contactoEmergencia: '',
     nombreContactoEmergencia: '',
     pesoActual: '',
-    altura: ''
+    altura: '',
+    patientIdForFamily: ''
   });
   const [editData, setEditData] = useState({});
   const [familyUsers, setFamilyUsers] = useState([]);
@@ -120,31 +122,55 @@ const PatientList = () => {
           nombreCompleto: createData.name,
           edad: calculateAge(createData.birthdate),
           telefono: createData.phone,
-          tipo_usuario: 'paciente',
+          tipo_usuario: createData.tipo_usuario,
           estado: 'activo',
           fecha_nacimiento: createData.birthdate
         })
       });
       if (!usuarioRes.ok) throw new Error('Error al crear usuario');
       const usuario = await usuarioRes.json();
-      const pacienteRes = await fetch('/api/pacientes', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${token}`
-        },
-        body: JSON.stringify({ 
-          usuario_id: usuario.id,
-          direccion: createData.direccion,
-          nombre_tutor: createData.nombreTutor,
-          celular_tutor: createData.celularTutor,
-          contacto_emergencia: createData.contactoEmergencia,
-          nombre_contacto_emergencia: createData.nombreContactoEmergencia,
-          peso_actual: createData.pesoActual ? parseFloat(createData.pesoActual) : null,
-          altura: createData.altura ? parseFloat(createData.altura) : null,
-        })
-      });
-      if (!pacienteRes.ok) throw new Error('Error al crear paciente');
+      if (createData.tipo_usuario === 'paciente') {
+        const pacienteRes = await fetch('/api/pacientes', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${token}`
+          },
+          body: JSON.stringify({ 
+            usuario_id: usuario.id,
+            direccion: createData.direccion,
+            nombre_tutor: createData.nombreTutor,
+            celular_tutor: createData.celularTutor,
+            contacto_emergencia: createData.contactoEmergencia,
+            nombre_contacto_emergencia: createData.nombreContactoEmergencia,
+            peso_actual: createData.pesoActual ? parseFloat(createData.pesoActual) : null,
+            altura: createData.altura ? parseFloat(createData.altura) : null,
+          })
+        });
+        if (!pacienteRes.ok) throw new Error('Error al crear paciente');
+      }
+
+      if (createData.tipo_usuario === 'familiar') {
+        if (!createData.patientIdForFamily) {
+          throw new Error('Debes seleccionar un paciente para el familiar');
+        }
+        const assignResponse = await fetch('/api/familiares/asignar', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${token}`
+          },
+          body: JSON.stringify({
+            familiar_usuario_id: usuario.id,
+            paciente_id: createData.patientIdForFamily,
+          })
+        });
+        if (!assignResponse.ok) {
+          const assignError = await assignResponse.json().catch(() => ({}));
+          throw new Error(assignError.error || 'Error al asignar el familiar al paciente');
+        }
+      }
+
       const res = await fetch('/api/pacientes', {
         headers: { 'Authorization': `Bearer ${token}` }
       });
@@ -169,6 +195,7 @@ const PatientList = () => {
         altura: p.altura || '',      })));
       setShowCreate(false);
       setCreateData({ 
+        tipo_usuario: 'paciente',
         name: '', 
         email: '', 
         password: '', 
@@ -180,9 +207,10 @@ const PatientList = () => {
         contactoEmergencia: '',
         nombreContactoEmergencia: '',
         pesoActual: '',
-        altura: ''
+        altura: '',
+        patientIdForFamily: ''
       });
-      Swal.fire('Creado', 'El paciente ha sido creado.', 'success');
+      Swal.fire('Creado', createData.tipo_usuario === 'familiar' ? 'El familiar ha sido creado y asignado.' : 'El paciente ha sido creado.', 'success');
     } catch (err) {
       Swal.fire('Error', err.message, 'error');
     }
@@ -425,10 +453,28 @@ const PatientList = () => {
               </button>
               <div className="flex flex-col items-center mb-6">
                 <UserPlus size={40} className="text-primary mb-2" />
-                <h2 className="text-3xl font-bold text-primary mb-2">Nuevo Paciente</h2>
-                <p className="text-gray-600 text-center">Completa los datos para registrar un paciente en el sistema.</p>
+                <h2 className="text-3xl font-bold text-primary mb-2">
+                  {createData.tipo_usuario === 'familiar' ? 'Nuevo Familiar' : 'Nuevo Paciente'}
+                </h2>
+                <p className="text-gray-600 text-center">
+                  {createData.tipo_usuario === 'familiar'
+                    ? 'Crea un familiar y asígnalo a un paciente específico.'
+                    : 'Completa los datos para registrar un paciente en el sistema.'}
+                </p>
               </div>
               <form onSubmit={handleCreateSave} className="space-y-4 max-h-[70vh] overflow-y-auto">
+                <div>
+                  <label className="block text-sm font-semibold text-gray-700 mb-1">Tipo de usuario</label>
+                  <select
+                    name="tipo_usuario"
+                    value={createData.tipo_usuario}
+                    onChange={handleCreateChange}
+                    className="w-full px-4 py-3 border-2 border-gray-300 rounded-lg focus:outline-none focus:border-primary"
+                  >
+                    <option value="paciente">Paciente</option>
+                    <option value="familiar">Familiar</option>
+                  </select>
+                </div>
                 <div>
                   <label className="block text-sm font-semibold text-gray-700 mb-1">Nombre completo</label>
                   <input name="name" type="text" value={createData.name} onChange={handleCreateChange} placeholder="Ej. Juan Pérez García" className="w-full px-4 py-3 border-2 border-gray-300 rounded-lg focus:outline-none focus:border-primary" required />
@@ -449,50 +495,66 @@ const PatientList = () => {
                   <label className="block text-sm font-semibold text-gray-700 mb-1">Fecha de nacimiento</label>
                   <input name="birthdate" type="date" value={createData.birthdate} onChange={handleCreateChange} className="w-full px-4 py-3 border-2 border-gray-300 rounded-lg focus:outline-none focus:border-primary" required />
                 </div>
-                
-                {/* Nuevos campos */}
-                <div className="border-t-2 border-gray-200 pt-4 mt-4">
-                  <h3 className="text-lg font-bold text-gray-800 mb-3">📍 Información Adicional</h3>
-                  
-                  <div className="mb-3">
-                    <label className="block text-sm font-semibold text-gray-700 mb-1">Dirección de vivienda</label>
-                    <input name="direccion" type="text" value={createData.direccion} onChange={handleCreateChange} placeholder="Calle, número, colonia, ciudad" className="w-full px-4 py-3 border-2 border-gray-300 rounded-lg focus:outline-none focus:border-primary" />
-                  </div>
-                  
-                  <div className="mb-3">
-                    <label className="block text-sm font-semibold text-gray-700 mb-1">Nombre del tutor/pareja</label>
-                    <input name="nombreTutor" type="text" value={createData.nombreTutor} onChange={handleCreateChange} placeholder="Nombre completo" className="w-full px-4 py-3 border-2 border-gray-300 rounded-lg focus:outline-none focus:border-primary" />
-                  </div>
-                  
-                  <div className="mb-3">
-                    <label className="block text-sm font-semibold text-gray-700 mb-1">Teléfono del tutor/pareja</label>
-                    <input name="celularTutor" type="text" value={createData.celularTutor} onChange={handleCreateChange} placeholder="+52 123 456 7890" className="w-full px-4 py-3 border-2 border-gray-300 rounded-lg focus:outline-none focus:border-primary" />
-                  </div>
-                  
-                  <div className="mb-3">
-                    <label className="block text-sm font-semibold text-gray-700 mb-1">Nombre contacto de emergencia</label>
-                    <input name="nombreContactoEmergencia" type="text" value={createData.nombreContactoEmergencia} onChange={handleCreateChange} placeholder="Persona adicional a contactar" className="w-full px-4 py-3 border-2 border-gray-300 rounded-lg focus:outline-none focus:border-primary" />
-                  </div>
-                  
-                  <div className="mb-3">
-                    <label className="block text-sm font-semibold text-gray-700 mb-1">Teléfono de emergencia</label>
-                    <input name="contactoEmergencia" type="text" value={createData.contactoEmergencia} onChange={handleCreateChange} placeholder="+52 123 456 7890" className="w-full px-4 py-3 border-2 border-gray-300 rounded-lg focus:outline-none focus:border-primary" />
-                  </div>
-                  
-                  <div className="grid grid-cols-2 gap-3">
-                    <div>
-                      <label className="block text-sm font-semibold text-gray-700 mb-1">Peso actual (kg)</label>
-                      <input name="pesoActual" type="number" step="0.1" value={createData.pesoActual} onChange={handleCreateChange} placeholder="70.5" className="w-full px-4 py-3 border-2 border-gray-300 rounded-lg focus:outline-none focus:border-primary" />
+
+                {createData.tipo_usuario === 'paciente' && (
+                  <div className="border-t-2 border-gray-200 pt-4 mt-4">
+                    <h3 className="text-lg font-bold text-gray-800 mb-3">📍 Información Adicional</h3>
+                    <div className="mb-3">
+                      <label className="block text-sm font-semibold text-gray-700 mb-1">Dirección de vivienda</label>
+                      <input name="direccion" type="text" value={createData.direccion} onChange={handleCreateChange} placeholder="Calle, número, colonia, ciudad" className="w-full px-4 py-3 border-2 border-gray-300 rounded-lg focus:outline-none focus:border-primary" />
                     </div>
-                    <div>
-                      <label className="block text-sm font-semibold text-gray-700 mb-1">Altura (m)</label>
-                      <input name="altura" type="number" step="0.01" value={createData.altura} onChange={handleCreateChange} placeholder="1.75" className="w-full px-4 py-3 border-2 border-gray-300 rounded-lg focus:outline-none focus:border-primary" />
+                    <div className="mb-3">
+                      <label className="block text-sm font-semibold text-gray-700 mb-1">Nombre del tutor/pareja</label>
+                      <input name="nombreTutor" type="text" value={createData.nombreTutor} onChange={handleCreateChange} placeholder="Nombre completo" className="w-full px-4 py-3 border-2 border-gray-300 rounded-lg focus:outline-none focus:border-primary" />
+                    </div>
+                    <div className="mb-3">
+                      <label className="block text-sm font-semibold text-gray-700 mb-1">Teléfono del tutor/pareja</label>
+                      <input name="celularTutor" type="text" value={createData.celularTutor} onChange={handleCreateChange} placeholder="+52 123 456 7890" className="w-full px-4 py-3 border-2 border-gray-300 rounded-lg focus:outline-none focus:border-primary" />
+                    </div>
+                    <div className="mb-3">
+                      <label className="block text-sm font-semibold text-gray-700 mb-1">Nombre contacto de emergencia</label>
+                      <input name="nombreContactoEmergencia" type="text" value={createData.nombreContactoEmergencia} onChange={handleCreateChange} placeholder="Persona adicional a contactar" className="w-full px-4 py-3 border-2 border-gray-300 rounded-lg focus:outline-none focus:border-primary" />
+                    </div>
+                    <div className="mb-3">
+                      <label className="block text-sm font-semibold text-gray-700 mb-1">Teléfono de emergencia</label>
+                      <input name="contactoEmergencia" type="text" value={createData.contactoEmergencia} onChange={handleCreateChange} placeholder="+52 123 456 7890" className="w-full px-4 py-3 border-2 border-gray-300 rounded-lg focus:outline-none focus:border-primary" />
+                    </div>
+                    <div className="grid grid-cols-2 gap-3">
+                      <div>
+                        <label className="block text-sm font-semibold text-gray-700 mb-1">Peso actual (kg)</label>
+                        <input name="pesoActual" type="number" step="0.1" value={createData.pesoActual} onChange={handleCreateChange} placeholder="70.5" className="w-full px-4 py-3 border-2 border-gray-300 rounded-lg focus:outline-none focus:border-primary" />
+                      </div>
+                      <div>
+                        <label className="block text-sm font-semibold text-gray-700 mb-1">Altura (m)</label>
+                        <input name="altura" type="number" step="0.01" value={createData.altura} onChange={handleCreateChange} placeholder="1.75" className="w-full px-4 py-3 border-2 border-gray-300 rounded-lg focus:outline-none focus:border-primary" />
+                      </div>
                     </div>
                   </div>
-                </div>
+                )}
+
+                {createData.tipo_usuario === 'familiar' && (
+                  <div className="border-t-2 border-gray-200 pt-4 mt-4">
+                    <h3 className="text-lg font-bold text-gray-800 mb-3">👪 Asignación del Familiar</h3>
+                    <div className="mb-3">
+                      <label className="block text-sm font-semibold text-gray-700 mb-1">Paciente asignado</label>
+                      <select
+                        name="patientIdForFamily"
+                        value={createData.patientIdForFamily}
+                        onChange={handleCreateChange}
+                        className="w-full px-4 py-3 border-2 border-gray-300 rounded-lg focus:outline-none focus:border-primary"
+                        required
+                      >
+                        <option value="">Seleccionar paciente</option>
+                        {patients.map(patient => (
+                          <option key={patient.id} value={patient.id}>{patient.name}</option>
+                        ))}
+                      </select>
+                    </div>
+                  </div>
+                )}
                 
                 <button type="submit" className="w-full bg-primary text-white py-3 rounded-lg hover:bg-primary-dark transition-colors font-semibold text-lg shadow sticky bottom-0">
-                  Crear Paciente
+                  {createData.tipo_usuario === 'familiar' ? 'Crear Familiar' : 'Crear Paciente'}
                 </button>
               </form>
             </div>
