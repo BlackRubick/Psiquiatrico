@@ -52,6 +52,7 @@ const FamilyDashboard = () => {
     anger: 'Enojo',
     miedo: 'Miedo',
     fear: 'Miedo',
+    afraid: 'Miedo',
     ansiedad: 'Ansiedad',
     anxiety: 'Ansiedad',
     calma: 'Calma',
