@@ -133,8 +133,9 @@ const PatientList = () => {
           fecha_nacimiento: createData.birthdate
         })
       });
-      if (!usuarioRes.ok) throw new Error('Error al crear usuario');
-      const usuario = await usuarioRes.json();
+      const usuarioData = await usuarioRes.json().catch(() => ({}));
+      if (!usuarioRes.ok) throw new Error(usuarioData.error || 'Error al crear usuario');
+      const usuario = usuarioData;
       if (createData.tipo_usuario === 'paciente') {
         const pacienteRes = await fetch('/api/pacientes', {
           method: 'POST',
@@ -171,9 +172,9 @@ const PatientList = () => {
             paciente_id: createData.patientIdForFamily,
           })
         });
+        const assignDataResponse = await assignResponse.json().catch(() => ({}));
         if (!assignResponse.ok) {
-          const assignError = await assignResponse.json().catch(() => ({}));
-          throw new Error(assignError.error || 'Error al asignar el familiar al paciente');
+          throw new Error(assignDataResponse.error || 'Error al asignar el familiar al paciente');
         }
       }
 

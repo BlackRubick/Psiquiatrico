@@ -23,9 +23,27 @@ exports.getById = async (req, res) => {
 exports.create = async (req, res) => {
   try {
     const { username, email, password, nombreCompleto, edad, telefono, tipo_usuario, estado, fecha_nacimiento } = req.body;
+    const normalizedType = String(tipo_usuario || '').toLowerCase().trim();
 
-    if (req.user?.tipo_usuario === 'healthcare' && !['paciente', 'familiar'].includes(String(tipo_usuario).toLowerCase())) {
+    if (!username || !email || !password || !nombreCompleto || !normalizedType) {
+      return res.status(400).json({ error: 'Faltan campos obligatorios para crear el usuario' });
+    }
+
+    if (req.user?.tipo_usuario === 'healthcare' && !['paciente', 'familiar'].includes(normalizedType)) {
       return res.status(403).json({ error: 'Solo puedes crear usuarios tipo paciente o familiar' });
+    }
+
+    const exists = await Usuario.findOne({
+      where: {
+        [require('sequelize').Op.or]: [
+          { email },
+          { username },
+        ],
+      },
+    });
+
+    if (exists) {
+      return res.status(409).json({ error: 'Ya existe un usuario con ese correo o nombre de usuario' });
     }
 
     const hash = await bcrypt.hash(password, 10);
@@ -36,12 +54,16 @@ exports.create = async (req, res) => {
       nombreCompleto,
       edad,
       telefono,
-      tipo_usuario,
+      tipo_usuario: normalizedType,
       estado,
       fecha_nacimiento,
     });
     res.status(201).json({ id: user.id, nombre: user.nombreCompleto, tipo_usuario: user.tipo_usuario, email: user.email });
   } catch (err) {
+    if (err.name === 'SequelizeValidationError' || err.name === 'SequelizeUniqueConstraintError') {
+      return res.status(400).json({ error: err.errors?.[0]?.message || err.message || 'Error de validación al crear usuario' });
+    }
+    console.error('Error al crear usuario:', err);
     res.status(500).json({ error: 'Error al crear usuario' });
   }
 };
