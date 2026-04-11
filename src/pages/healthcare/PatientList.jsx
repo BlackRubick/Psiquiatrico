@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { ArrowLeft, Search, Pencil, Trash, UserPlus, X } from 'lucide-react';
+import { ArrowLeft, Search, Pencil, Trash, UserPlus, X, Users } from 'lucide-react';
 import Logo from '../../components/common/Logo';
 import Swal from 'sweetalert2';
 import React from 'react';
@@ -9,6 +9,7 @@ const PatientList = () => {
   const [searchTerm, setSearchTerm] = useState('');
   const [showCreate, setShowCreate] = useState(false);
   const [showEdit, setShowEdit] = useState(false);
+  const [showAssignFamily, setShowAssignFamily] = useState(false);
   const [createData, setCreateData] = useState({ 
     name: '', 
     email: '', 
@@ -24,6 +25,8 @@ const PatientList = () => {
     altura: ''
   });
   const [editData, setEditData] = useState({});
+  const [familyUsers, setFamilyUsers] = useState([]);
+  const [assignData, setAssignData] = useState({ patientId: '', familiarUserId: '' });
   const [patients, setPatients] = useState([]);
   const token = localStorage.getItem('biopsyche_token');
 
@@ -55,6 +58,23 @@ const PatientList = () => {
       }
     };
     fetchPatients();
+  }, [token]);
+
+  React.useEffect(() => {
+    const fetchFamilies = async () => {
+      try {
+        const res = await fetch('/api/familiares/usuarios', {
+          headers: { 'Authorization': `Bearer ${token}` }
+        });
+        if (res.ok) {
+          const data = await res.json();
+          setFamilyUsers(data);
+        }
+      } catch (err) {
+        console.error('Error al cargar familiares:', err);
+      }
+    };
+    fetchFamilies();
   }, [token]);
 
   const filteredPatients = patients.filter((patient) =>
@@ -280,6 +300,34 @@ const PatientList = () => {
     }
   };
 
+  const handleOpenAssignFamily = (patient) => {
+    setAssignData({ patientId: patient.id, familiarUserId: '' });
+    setShowAssignFamily(true);
+  };
+
+  const handleAssignFamily = async (e) => {
+    e.preventDefault();
+    try {
+      const response = await fetch('/api/familiares/asignar', {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+          paciente_id: assignData.patientId,
+          familiar_usuario_id: assignData.familiarUserId,
+        })
+      });
+      const data = await response.json().catch(() => ({}));
+      if (!response.ok) throw new Error(data.error || 'No se pudo asignar el familiar');
+      setShowAssignFamily(false);
+      Swal.fire('Asignado', 'El familiar fue vinculado correctamente al paciente.', 'success');
+    } catch (err) {
+      Swal.fire('Error', err.message, 'error');
+    }
+  };
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-gray-600 via-gray-700 to-gray-800 p-4">
       <div className="max-w-6xl mx-auto">
@@ -355,6 +403,9 @@ const PatientList = () => {
                     <td className="px-4 py-4 text-center">
                       <button onClick={() => handleEditPatient(patient)} className="text-primary hover:text-blue-600 mr-2">
                         <Pencil size={20} />
+                      </button>
+                      <button onClick={() => handleOpenAssignFamily(patient)} className="text-amber-500 hover:text-amber-600 mr-2">
+                        <Users size={20} />
                       </button>
                       <button onClick={() => handleDeletePatient(patient.id)} className="text-red-500 hover:text-red-700">
                         <Trash size={20} />
@@ -523,6 +574,36 @@ const PatientList = () => {
                 
                 <button type="submit" className="w-full bg-primary text-white py-3 rounded-lg hover:bg-primary-dark transition-colors font-semibold text-lg shadow sticky bottom-0">
                   Guardar Cambios
+                </button>
+              </form>
+            </div>
+          </div>
+        )}
+        {showAssignFamily && (
+          <div className="fixed inset-0 bg-black bg-opacity-40 flex items-center justify-center z-50">
+            <div className="bg-white rounded-2xl shadow-2xl p-8 w-full max-w-md relative">
+              <button onClick={() => setShowAssignFamily(false)} className="absolute top-4 right-4 text-gray-500 hover:text-red-500">
+                <X size={28} />
+              </button>
+              <div className="flex flex-col items-center mb-6">
+                <Users size={40} className="text-amber-500 mb-2" />
+                <h2 className="text-3xl font-bold text-amber-500 mb-2">Asignar Familiar</h2>
+                <p className="text-gray-600 text-center">Vincula un familiar a este paciente para la red de apoyo.</p>
+              </div>
+              <form onSubmit={handleAssignFamily} className="space-y-4">
+                <select
+                  value={assignData.familiarUserId}
+                  onChange={(e) => setAssignData(prev => ({ ...prev, familiarUserId: e.target.value }))}
+                  className="w-full px-4 py-3 border-2 border-gray-300 rounded-lg focus:outline-none focus:border-primary"
+                  required
+                >
+                  <option value="">Seleccionar familiar</option>
+                  {familyUsers.map(user => (
+                    <option key={user.id} value={user.id}>{user.nombreCompleto} - {user.email}</option>
+                  ))}
+                </select>
+                <button type="submit" className="w-full bg-amber-500 text-white px-6 py-3 rounded-lg font-semibold hover:bg-amber-600 transition-colors">
+                  Guardar asignación
                 </button>
               </form>
             </div>

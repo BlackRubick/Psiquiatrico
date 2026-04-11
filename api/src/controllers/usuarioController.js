@@ -24,8 +24,8 @@ exports.create = async (req, res) => {
   try {
     const { username, email, password, nombreCompleto, edad, telefono, tipo_usuario, estado, fecha_nacimiento } = req.body;
 
-    if (req.user?.tipo_usuario === 'healthcare' && tipo_usuario !== 'paciente') {
-      return res.status(403).json({ error: 'Solo puedes crear usuarios tipo paciente' });
+    if (req.user?.tipo_usuario === 'healthcare' && !['paciente', 'familiar'].includes(String(tipo_usuario).toLowerCase())) {
+      return res.status(403).json({ error: 'Solo puedes crear usuarios tipo paciente o familiar' });
     }
 
     const hash = await bcrypt.hash(password, 10);
@@ -51,8 +51,8 @@ exports.update = async (req, res) => {
     const user = await Usuario.findByPk(req.params.id);
     if (!user) return res.status(404).json({ error: 'Usuario no encontrado' });
 
-    if (req.user?.tipo_usuario === 'healthcare' && user.tipo_usuario !== 'paciente') {
-      return res.status(403).json({ error: 'Solo puedes actualizar usuarios tipo paciente' });
+    if (req.user?.tipo_usuario === 'healthcare' && !['paciente', 'familiar'].includes(String(user.tipo_usuario).toLowerCase())) {
+      return res.status(403).json({ error: 'Solo puedes actualizar usuarios tipo paciente o familiar' });
     }
 
     const { nombreCompleto, edad, telefono, tipo_usuario, estado, email, fecha_nacimiento, password } = req.body;
