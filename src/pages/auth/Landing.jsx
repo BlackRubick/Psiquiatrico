@@ -130,8 +130,7 @@ const Landing = () => {
 };
 
 
-// Componente para solicitar recuperación de contraseña
-import { useState } from 'react';
+// ...existing code...
 function PasswordResetRequest({ onBack }) {
   const [email, setEmail] = useState("");
   const [message, setMessage] = useState("");
