@@ -1,0 +1,10 @@
+{
+  "development": {
+    "username": "cesar",
+    "password": "cesar123",
+    "database": "biopsyche",
+    "host": "localhost",
+    "port": 3306,
+    "dialect": "mysql"
+  }
+}
