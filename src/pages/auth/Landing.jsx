@@ -130,32 +130,31 @@ const Landing = () => {
 };
 
 
-// ...existing code...
 function PasswordResetRequest({ onBack }) {
-  const [email, setEmail] = useState("");
-  const [message, setMessage] = useState("");
-  const [error, setError] = useState("");
-  const [token, setToken] = useState("");
+  const [resetEmail, setResetEmail] = useState("");
+  const [resetMessage, setResetMessage] = useState("");
+  const [resetError, setResetError] = useState("");
+  const [resetToken, setResetToken] = useState("");
   const [showResetForm, setShowResetForm] = useState(false);
 
   const handleRequest = async (e) => {
     e.preventDefault();
-    setError("");
-    setMessage("");
-    setToken("");
+    setResetError("");
+    setResetMessage("");
+    setResetToken("");
     try {
       const res = await fetch("/api/auth/reset-password-request", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ email })
+        body: JSON.stringify({ email: resetEmail })
       });
       const data = await res.json();
       if (!res.ok) throw new Error(data.error || "Error en la solicitud");
-      setMessage(data.message || "Revisa tu correo para continuar.");
-      setToken(data.token || "");
+      setResetMessage(data.message || "Revisa tu correo para continuar.");
+      setResetToken(data.token || "");
       setShowResetForm(true);
     } catch (err) {
-      setError(err.message);
+      setResetError(err.message);
     }
   };
 
@@ -167,8 +166,8 @@ function PasswordResetRequest({ onBack }) {
           <input
             type="email"
             placeholder="Correo electrónico"
-            value={email}
-            onChange={e => setEmail(e.target.value)}
+            value={resetEmail}
+            onChange={e => setResetEmail(e.target.value)}
             className="w-full px-4 py-3 border-2 rounded-lg focus:outline-none border-gray-300 focus:border-primary bg-white"
             required
           />
@@ -178,17 +177,17 @@ function PasswordResetRequest({ onBack }) {
           <button type="button" className="w-full text-gray-600 py-2 mt-2 hover:text-gray-800" onClick={onBack}>
             Volver
           </button>
-          {error && <div className="text-red-500 text-sm mt-2">{error}</div>}
-          {message && <div className="text-green-600 text-sm mt-2">{message}</div>}
-          {token && (
+          {resetError && <div className="text-red-500 text-sm mt-2">{resetError}</div>}
+          {resetMessage && <div className="text-green-600 text-sm mt-2">{resetMessage}</div>}
+          {resetToken && (
             <div className="text-xs mt-2 bg-gray-100 p-2 rounded">
               <strong>Token de recuperación (pruebas):</strong><br />
-              <span className="break-all">{token}</span>
+              <span className="break-all">{resetToken}</span>
             </div>
           )}
         </form>
       ) : (
-        <PasswordResetForm token={token} onBack={onBack} />
+        <PasswordResetForm token={resetToken} onBack={onBack} />
       )}
     </div>
   );
@@ -196,27 +195,27 @@ function PasswordResetRequest({ onBack }) {
 
 // Componente para ingresar nueva contraseña
 function PasswordResetForm({ token, onBack }) {
-  const [password, setPassword] = useState("");
-  const [message, setMessage] = useState("");
-  const [error, setError] = useState("");
+  const [newPassword, setNewPassword] = useState("");
+  const [resetMessage, setResetMessage] = useState("");
+  const [resetError, setResetError] = useState("");
   const [done, setDone] = useState(false);
 
   const handleReset = async (e) => {
     e.preventDefault();
-    setError("");
-    setMessage("");
+    setResetError("");
+    setResetMessage("");
     try {
       const res = await fetch("/api/auth/reset-password", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ token, password })
+        body: JSON.stringify({ token, password: newPassword })
       });
       const data = await res.json();
       if (!res.ok) throw new Error(data.error || "Error al restablecer contraseña");
-      setMessage(data.message || "Contraseña restablecida correctamente");
+      setResetMessage(data.message || "Contraseña restablecida correctamente");
       setDone(true);
     } catch (err) {
-      setError(err.message);
+      setResetError(err.message);
     }
   };
 
@@ -227,8 +226,8 @@ function PasswordResetForm({ token, onBack }) {
           <input
             type="password"
             placeholder="Nueva contraseña"
-            value={password}
-            onChange={e => setPassword(e.target.value)}
+            value={newPassword}
+            onChange={e => setNewPassword(e.target.value)}
             className="w-full px-4 py-3 border-2 rounded-lg focus:outline-none border-gray-300 focus:border-primary bg-white"
             required
           />
@@ -238,12 +237,12 @@ function PasswordResetForm({ token, onBack }) {
           <button type="button" className="w-full text-gray-600 py-2 mt-2 hover:text-gray-800" onClick={onBack}>
             Volver
           </button>
-          {error && <div className="text-red-500 text-sm mt-2">{error}</div>}
-          {message && <div className="text-green-600 text-sm mt-2">{message}</div>}
+          {resetError && <div className="text-red-500 text-sm mt-2">{resetError}</div>}
+          {resetMessage && <div className="text-green-600 text-sm mt-2">{resetMessage}</div>}
         </form>
       ) : (
         <div className="text-center">
-          <div className="text-green-600 text-lg mb-4">{message}</div>
+          <div className="text-green-600 text-lg mb-4">{resetMessage}</div>
           <button type="button" className="w-full bg-primary text-white py-3 rounded-lg hover:bg-primary-dark transition-colors font-semibold" onClick={onBack}>
             Volver al inicio
           </button>
