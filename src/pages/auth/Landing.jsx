@@ -13,6 +13,7 @@ const Landing = () => {
   const [usernameOrEmail, setUsernameOrEmail] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
+  const [showReset, setShowReset] = useState(false);
 
   const handleLogin = async (e) => {
     e.preventDefault();
@@ -61,7 +62,6 @@ const Landing = () => {
       >
         {isDark ? <Sun size={24} /> : <Moon size={24} />}
       </button>
-      
       <div className="max-w-md w-full">
         <div className="text-center mb-8">
           <Logo className="w-24 h-24 mx-auto mb-4" />
@@ -74,49 +74,184 @@ const Landing = () => {
             </svg>
           </div>
         </div>
-
-        <form onSubmit={handleLogin} className={`rounded-lg shadow-xl p-8 space-y-4 transition-colors duration-300 ${
-          isDark 
-            ? 'bg-white' 
-            : 'bg-white border-2 border-gray-200'
-        }`}>
-          <h2 className={`text-2xl font-semibold text-center mb-6 ${isDark ? 'text-gray-800' : 'text-gray-700'}`}>
-            Iniciar sesión
-          </h2>
-          <div className="space-y-3">
-            <input
-              type="text"
-              placeholder="Usuario o correo electrónico"
-              value={usernameOrEmail}
-              onChange={e => setUsernameOrEmail(e.target.value)}
-              className={`w-full px-4 py-3 border-2 rounded-lg focus:outline-none transition-colors ${
-                isDark
-                  ? 'border-gray-300 focus:border-primary bg-gray-50'
-                  : 'border-gray-300 focus:border-primary bg-white'
-              }`}
-              required
-            />
-            <input
-              type="password"
-              placeholder="Contraseña"
-              value={password}
-              onChange={e => setPassword(e.target.value)}
-              className={`w-full px-4 py-3 border-2 rounded-lg focus:outline-none transition-colors ${
-                isDark
-                  ? 'border-gray-300 focus:border-primary bg-gray-50'
-                  : 'border-gray-300 focus:border-primary bg-white'
-              }`}
-              required
-            />
-            <button type="submit" className="w-full bg-primary text-white py-3 rounded-lg hover:bg-primary-dark transition-colors font-semibold">
+        {!showReset ? (
+          <form onSubmit={handleLogin} className={`rounded-lg shadow-xl p-8 space-y-4 transition-colors duration-300 ${
+            isDark 
+              ? 'bg-white' 
+              : 'bg-white border-2 border-gray-200'
+          }`}>
+            <h2 className={`text-2xl font-semibold text-center mb-6 ${isDark ? 'text-gray-800' : 'text-gray-700'}`}>
               Iniciar sesión
-            </button>
-            {error && <div className="text-red-500 text-sm mt-2">{error}</div>}
-          </div>
-        </form>
+            </h2>
+            <div className="space-y-3">
+              <input
+                type="text"
+                placeholder="Usuario o correo electrónico"
+                value={usernameOrEmail}
+                onChange={e => setUsernameOrEmail(e.target.value)}
+                className={`w-full px-4 py-3 border-2 rounded-lg focus:outline-none transition-colors ${
+                  isDark
+                    ? 'border-gray-300 focus:border-primary bg-gray-50'
+                    : 'border-gray-300 focus:border-primary bg-white'
+                }`}
+                required
+              />
+              <input
+                type="password"
+                placeholder="Contraseña"
+                value={password}
+                onChange={e => setPassword(e.target.value)}
+                className={`w-full px-4 py-3 border-2 rounded-lg focus:outline-none transition-colors ${
+                  isDark
+                    ? 'border-gray-300 focus:border-primary bg-gray-50'
+                    : 'border-gray-300 focus:border-primary bg-white'
+                }`}
+                required
+              />
+              <button type="submit" className="w-full bg-primary text-white py-3 rounded-lg hover:bg-primary-dark transition-colors font-semibold">
+                Iniciar sesión
+              </button>
+              <button
+                type="button"
+                className="w-full text-primary underline text-sm mt-2"
+                onClick={() => setShowReset(true)}
+              >
+                ¿Olvidaste tu contraseña?
+              </button>
+              {error && <div className="text-red-500 text-sm mt-2">{error}</div>}
+            </div>
+          </form>
+        ) : (
+          <PasswordResetRequest onBack={() => setShowReset(false)} />
+        )}
       </div>
     </div>
   );
 };
+
+
+// Componente para solicitar recuperación de contraseña
+import { useState } from 'react';
+function PasswordResetRequest({ onBack }) {
+  const [email, setEmail] = useState("");
+  const [message, setMessage] = useState("");
+  const [error, setError] = useState("");
+  const [token, setToken] = useState("");
+  const [showResetForm, setShowResetForm] = useState(false);
+
+  const handleRequest = async (e) => {
+    e.preventDefault();
+    setError("");
+    setMessage("");
+    setToken("");
+    try {
+      const res = await fetch("/api/auth/reset-password-request", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ email })
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error || "Error en la solicitud");
+      setMessage(data.message || "Revisa tu correo para continuar.");
+      setToken(data.token || "");
+      setShowResetForm(true);
+    } catch (err) {
+      setError(err.message);
+    }
+  };
+
+  return (
+    <div className="rounded-lg shadow-xl p-8 space-y-4 bg-white border-2 border-gray-200">
+      <h2 className="text-2xl font-semibold text-center mb-6 text-gray-700">Recuperar contraseña</h2>
+      {!showResetForm ? (
+        <form onSubmit={handleRequest} className="space-y-3">
+          <input
+            type="email"
+            placeholder="Correo electrónico"
+            value={email}
+            onChange={e => setEmail(e.target.value)}
+            className="w-full px-4 py-3 border-2 rounded-lg focus:outline-none border-gray-300 focus:border-primary bg-white"
+            required
+          />
+          <button type="submit" className="w-full bg-primary text-white py-3 rounded-lg hover:bg-primary-dark transition-colors font-semibold">
+            Solicitar recuperación
+          </button>
+          <button type="button" className="w-full text-gray-600 py-2 mt-2 hover:text-gray-800" onClick={onBack}>
+            Volver
+          </button>
+          {error && <div className="text-red-500 text-sm mt-2">{error}</div>}
+          {message && <div className="text-green-600 text-sm mt-2">{message}</div>}
+          {token && (
+            <div className="text-xs mt-2 bg-gray-100 p-2 rounded">
+              <strong>Token de recuperación (pruebas):</strong><br />
+              <span className="break-all">{token}</span>
+            </div>
+          )}
+        </form>
+      ) : (
+        <PasswordResetForm token={token} onBack={onBack} />
+      )}
+    </div>
+  );
+}
+
+// Componente para ingresar nueva contraseña
+function PasswordResetForm({ token, onBack }) {
+  const [password, setPassword] = useState("");
+  const [message, setMessage] = useState("");
+  const [error, setError] = useState("");
+  const [done, setDone] = useState(false);
+
+  const handleReset = async (e) => {
+    e.preventDefault();
+    setError("");
+    setMessage("");
+    try {
+      const res = await fetch("/api/auth/reset-password", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ token, password })
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error || "Error al restablecer contraseña");
+      setMessage(data.message || "Contraseña restablecida correctamente");
+      setDone(true);
+    } catch (err) {
+      setError(err.message);
+    }
+  };
+
+  return (
+    <div>
+      {!done ? (
+        <form onSubmit={handleReset} className="space-y-3">
+          <input
+            type="password"
+            placeholder="Nueva contraseña"
+            value={password}
+            onChange={e => setPassword(e.target.value)}
+            className="w-full px-4 py-3 border-2 rounded-lg focus:outline-none border-gray-300 focus:border-primary bg-white"
+            required
+          />
+          <button type="submit" className="w-full bg-primary text-white py-3 rounded-lg hover:bg-primary-dark transition-colors font-semibold">
+            Restablecer contraseña
+          </button>
+          <button type="button" className="w-full text-gray-600 py-2 mt-2 hover:text-gray-800" onClick={onBack}>
+            Volver
+          </button>
+          {error && <div className="text-red-500 text-sm mt-2">{error}</div>}
+          {message && <div className="text-green-600 text-sm mt-2">{message}</div>}
+        </form>
+      ) : (
+        <div className="text-center">
+          <div className="text-green-600 text-lg mb-4">{message}</div>
+          <button type="button" className="w-full bg-primary text-white py-3 rounded-lg hover:bg-primary-dark transition-colors font-semibold" onClick={onBack}>
+            Volver al inicio
+          </button>
+        </div>
+      )}
+    </div>
+  );
+}
 
 export default Landing;

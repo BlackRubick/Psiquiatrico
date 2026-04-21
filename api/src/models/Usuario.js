@@ -14,6 +14,8 @@ const Usuario = sequelize.define('Usuario', {
   fecha_registro: { type: DataTypes.DATE, defaultValue: DataTypes.NOW },
   fecha_ultima_sesion: { type: DataTypes.DATE, allowNull: true },
   fecha_nacimiento: { type: DataTypes.DATE, allowNull: true },
+  reset_token: { type: DataTypes.STRING(255), allowNull: true },
+  reset_token_expiry: { type: DataTypes.DATE, allowNull: true },
 }, {
   tableName: 'usuarios',
   timestamps: false,
