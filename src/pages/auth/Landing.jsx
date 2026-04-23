@@ -1,4 +1,5 @@
 import { useNavigate, useLocation } from 'react-router-dom';
+import PasswordRecovery from './PasswordRecovery';
 import { useState, useEffect } from 'react';
 import { useAuth } from '../../contexts/AuthContext';
 import { useTheme } from '../../contexts/ThemeContext';
@@ -122,7 +123,7 @@ const Landing = () => {
             </div>
           </form>
         ) : (
-          <PasswordResetRequest onBack={() => setShowReset(false)} />
+          <PasswordRecovery />
         )}
       </div>
     </div>
