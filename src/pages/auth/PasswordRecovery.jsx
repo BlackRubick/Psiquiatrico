@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 
-export default function PasswordRecovery() {
+export default function PasswordRecovery({ onDone }) {
   const navigate = useNavigate();
   const [step, setStep] = useState(1);
   const [email, setEmail] = useState('');
@@ -64,6 +64,7 @@ export default function PasswordRecovery() {
       setMessage('Contraseña restablecida correctamente. Redirigiendo al login...');
       setStep(4);
       setTimeout(() => {
+        if (onDone) onDone();
         navigate('/');
       }, 2000);
     } else {

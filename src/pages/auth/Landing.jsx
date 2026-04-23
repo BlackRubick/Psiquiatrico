@@ -123,7 +123,7 @@ const Landing = () => {
             </div>
           </form>
         ) : (
-          <PasswordRecovery />
+          <PasswordRecovery onDone={() => setShowReset(false)} />
         )}
       </div>
     </div>
