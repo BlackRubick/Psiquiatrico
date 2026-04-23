@@ -31,6 +31,7 @@ exports.resetPasswordRequest = async (req, res) => {
     });
     return res.json({ message: 'Código enviado a tu correo.' });
   } catch (err) {
+    console.error('Error en recuperación:', err);
     return res.status(500).json({ error: 'Error en la solicitud de recuperación' });
   }
 };
