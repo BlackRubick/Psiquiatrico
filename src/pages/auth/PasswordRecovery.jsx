@@ -30,6 +30,10 @@ export default function PasswordRecovery() {
   const handleValidateCode = async (e) => {
     e.preventDefault();
     setError(''); setMessage('');
+    if (!code || code.trim().length === 0) {
+      setError('Debes ingresar el código recibido por correo.');
+      return;
+    }
     const res = await fetch('/api/auth/validate-reset-code', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
